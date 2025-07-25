@@ -19,8 +19,13 @@ model Product {
   name        String
   description String?
   price       Float
+  stock       Int      @default(0)
+  imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
 
   @@map("products")
 }
@@ -28,9 +33,18 @@ model Product {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
+  password  String
   name      String?
+  role      UserRole @default(CUSTOMER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  products  Product[]
 
   @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  SELLER
 }

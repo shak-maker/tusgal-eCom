@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Button } from "./ui/button";
 
 function ContainerOne(){
     return(<>
@@ -12,7 +13,18 @@ function ContainerOne(){
                     нүүрний хэмжээ, PD буюу нүдний зайд үндэслэн таны нүүрний 
                     хэлбэрт яг тохирсон шил санал болгодог,
                 </p>
-                <button>ХЭМЖИХ ЗААВАРЧИЛГАА</button>
+                <Button
+                className="
+                    bg-[#60b4f2] 
+                    text-white 
+                    rounded-xl 
+                    px-6 
+                    py-2 
+                    shadow-[0_0_20px_#60b4f2] 
+                    text-xs 
+                    font-semibold 
+                    hover:bg-[#4ea3e0] 
+                    transition">ХЭМЖИХ <br/>ЗААВАРЧИЛГАА</Button>
             </div>
             <div className="w-[50%] relative left-7 top-2">
                 <Image src="/womanBackground.png" alt="Woman Background" width={600} height={600} />

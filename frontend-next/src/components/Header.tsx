@@ -12,7 +12,7 @@ function Header() {
     <>
       <div className="sticky w-full h-[80px] md:h-[100px] lg:h-[100px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
         <a href="" className="w-[100px] md:w-[120px] lg:w-[120px] h-[30px] md:h-[40px] lg:h-[40px] flex items-center md:ml-5">
-          <img src="/brandLogo.png" alt="Brand Logo" className="ml-15 md:ml-8" />
+          <img src="/brandLogo.png" alt="Brand Logo" className="ml-5 md:ml-8" />
         </a>
 
         {/* Desktop Navigation (Hidden on Mobile) */}

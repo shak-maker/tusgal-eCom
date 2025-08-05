@@ -22,7 +22,7 @@ function Header() {
               <a href="#home" className="text-[rgba(255,0,0,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Нүүр</a>
             </li>
             <li>
-              <a href="#about" className="text-[#15191b] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Шил авах</a>
+              <a href="#about" className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Шил авах</a>
             </li>
             <li>
               <a href="#about" className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Нүүрний хэлбэр олох</a>
@@ -64,7 +64,7 @@ function Header() {
             <li>
             <a 
                 href="#about" 
-                className="text-[#15191b] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                className="text-[rgba(94,172,221,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
             >
                 Шил авах
             </a>

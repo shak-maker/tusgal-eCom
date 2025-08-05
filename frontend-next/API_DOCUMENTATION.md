@@ -1,78 +1,47 @@
-# E-commerce Backend API Documentation
+# Admin API Documentation
 
-This document describes all the API endpoints available in your Next.js e-commerce backend.
+This document describes all the API endpoints available for the admin dashboard.
 
 ## Base URL
-```
-http://localhost:3000/api
-```
+All endpoints are prefixed with `/api/admin/`
 
 ## Authentication
-Currently, the API uses a simple user ID system. In production, you should implement proper authentication with JWT tokens or NextAuth.js.
+All endpoints require admin authentication. The admin status is checked via the `useAuth` hook.
 
-## API Endpoints
+---
 
-### 1. Products API
+## 📦 Products API
 
-#### Get All Products
-```http
-GET /api/products
-```
-
-**Query Parameters:**
-- `page` (optional): Page number (default: 1)
-- `limit` (optional): Items per page (default: 10)
-- `category` (optional): Filter by category ID
-- `search` (optional): Search in name and description
-- `minPrice` (optional): Minimum price filter
-- `maxPrice` (optional): Maximum price filter
-- `faceShape` (optional): Filter by face shape
-
-**Example:**
-```http
-GET /api/products?page=1&limit=5&search=glasses&minPrice=50&maxPrice=200
-```
+### GET /api/admin/products
+**Get all products**
 
 **Response:**
 ```json
-{
-  "products": [
-    {
-      "id": "clx123",
+[
+  {
+    "id": "clx1234567890",
+    "name": "Ray-Ban Aviator Classic",
+    "description": "Timeless aviator sunglasses",
+    "price": 154.99,
+    "imageUrl": "https://example.com/image.jpg",
+    "stock": 25,
+    "faceShape": "Oval",
+    "categoryId": "clx1234567891",
+    "category": {
+      "id": "clx1234567891",
       "name": "Sunglasses",
-      "description": "Stylish sunglasses",
-      "price": 99.99,
-      "imageUrl": "https://example.com/image.jpg",
-      "stock": 10,
-      "faceShape": "round",
-      "categoryId": "cat123",
-      "category": {
-        "id": "cat123",
-        "name": "Sunglasses"
-      },
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 5,
-    "total": 25,
-    "totalPages": 5
+      "description": "Stylish sunglasses for all occasions"
+    },
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
   }
-}
+]
 ```
 
-#### Get Single Product
-```http
-GET /api/products/{id}
-```
+### POST /api/admin/products
+**Create a new product**
 
-#### Create Product
-```http
-POST /api/products
-```
-
-**Body:**
+**Request Body:**
 ```json
 {
   "name": "New Product",
@@ -80,49 +49,59 @@ POST /api/products
   "price": 99.99,
   "imageUrl": "https://example.com/image.jpg",
   "stock": 10,
-  "faceShape": "round",
-  "categoryId": "cat123"
+  "faceShape": "Round",
+  "categoryId": "clx1234567891"
 }
 ```
 
-#### Update Product
-```http
-PUT /api/products/{id}
-```
+**Required Fields:** `name`, `price`, `imageUrl`, `categoryId`
 
-#### Delete Product
-```http
-DELETE /api/products/{id}
-```
+**Response:** `201 Created` with the created product
 
-### 2. Categories API
+### GET /api/admin/products/[id]
+**Get a single product**
 
-#### Get All Categories
-```http
-GET /api/categories
-```
+**Response:** Product object with category included
+
+### PUT /api/admin/products/[id]
+**Update a product**
+
+**Request Body:** Same as POST, but all fields are optional
+
+**Response:** Updated product object
+
+### DELETE /api/admin/products/[id]
+**Delete a product**
+
+**Response:** `200 OK` with success message
+
+---
+
+## 📂 Categories API
+
+### GET /api/admin/categories
+**Get all categories**
 
 **Response:**
 ```json
 [
   {
-    "id": "cat123",
+    "id": "clx1234567891",
     "name": "Sunglasses",
-    "description": "Eye protection",
-    "createdAt": "2024-01-01T00:00:00Z",
+    "description": "Stylish sunglasses for all occasions",
     "_count": {
-      "products": 15
-    }
+      "products": 2
+    },
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
   }
 ]
 ```
 
-#### Create Category
-```http
-POST /api/categories
-```
+### POST /api/admin/categories
+**Create a new category**
 
-**Body:**
+**Request Body:**
 ```json
 {
   "name": "New Category",
@@ -130,268 +109,218 @@ POST /api/categories
 }
 ```
 
-### 3. Users API
+**Required Fields:** `name`
 
-#### Get/Create User
-```http
-GET /api/users?email=user@example.com
-```
+**Response:** `201 Created` with the created category
 
-**Response:**
-```json
-{
-  "id": "user123",
-  "email": "user@example.com",
-  "name": "John Doe",
-  "phone": "+1234567890",
-  "address": "123 Main St",
-  "createdAt": "2024-01-01T00:00:00Z"
-}
-```
+### GET /api/admin/categories/[id]
+**Get a single category**
 
-#### Create/Update User
-```http
-POST /api/users
-```
+**Response:** Category object with products included
 
-**Body:**
-```json
-{
-  "email": "user@example.com",
-  "name": "John Doe",
-  "phone": "+1234567890",
-  "address": "123 Main St"
-}
-```
+### PUT /api/admin/categories/[id]
+**Update a category**
 
-### 4. Cart API
+**Request Body:** Same as POST, but all fields are optional
 
-#### Get User Cart
-```http
-GET /api/cart?userId=user123
-```
+**Response:** Updated category object
+
+### DELETE /api/admin/categories/[id]
+**Delete a category**
+
+**Note:** Cannot delete categories that have products
+
+**Response:** `200 OK` with success message
+
+---
+
+## 📥 Orders API
+
+### GET /api/admin/orders
+**Get all orders with pagination**
+
+**Query Parameters:**
+- `status` (optional): Filter by order status
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 20)
 
 **Response:**
 ```json
 {
-  "items": [
+  "orders": [
     {
-      "id": "cart123",
-      "userId": "user123",
-      "productId": "prod123",
-      "quantity": 2,
-      "product": {
-        "id": "prod123",
-        "name": "Sunglasses",
-        "price": 99.99,
-        "imageUrl": "https://example.com/image.jpg",
-        "category": {
-          "id": "cat123",
-          "name": "Sunglasses"
-        }
-      }
-    }
-  ],
-  "total": 199.98,
-  "itemCount": 1
-}
-```
-
-#### Add Item to Cart
-```http
-POST /api/cart
-```
-
-**Body:**
-```json
-{
-  "userId": "user123",
-  "productId": "prod123",
-  "quantity": 1
-}
-```
-
-#### Update Cart Item
-```http
-PUT /api/cart
-```
-
-**Body:**
-```json
-{
-  "userId": "user123",
-  "productId": "prod123",
-  "quantity": 3
-}
-```
-
-#### Remove Item from Cart
-```http
-DELETE /api/cart?userId=user123&productId=prod123
-```
-
-### 5. Orders API
-
-#### Get User Orders
-```http
-GET /api/orders?userId=user123&status=pending
-```
-
-**Response:**
-```json
-[
-  {
-    "id": "order123",
-    "userId": "user123",
-    "total": 199.98,
-    "status": "PENDING",
-    "paid": false,
-    "shippingAddress": "123 Main St",
-    "phone": "+1234567890",
-    "email": "user@example.com",
-    "createdAt": "2024-01-01T00:00:00Z",
-    "items": [
-      {
-        "id": "item123",
-        "orderId": "order123",
-        "productId": "prod123",
-        "quantity": 2,
-        "price": 99.99,
-        "product": {
-          "id": "prod123",
-          "name": "Sunglasses",
-          "price": 99.99,
-          "category": {
-            "id": "cat123",
-            "name": "Sunglasses"
+      "id": "clx1234567892",
+      "userId": "clx1234567893",
+      "total": 154.99,
+      "status": "PENDING",
+      "paid": false,
+      "shippingAddress": "123 Main St, New York, NY 10001",
+      "phone": "+1-555-0123",
+      "email": "john@example.com",
+      "user": {
+        "id": "clx1234567893",
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "items": [
+        {
+          "id": "clx1234567894",
+          "quantity": 1,
+          "price": 154.99,
+          "product": {
+            "id": "clx1234567890",
+            "name": "Ray-Ban Aviator Classic",
+            "price": 154.99,
+            "category": {
+              "name": "Sunglasses"
+            }
           }
         }
-      }
-    ]
-  }
-]
-```
-
-#### Create Order
-```http
-POST /api/orders
-```
-
-**Body:**
-```json
-{
-  "userId": "user123",
-  "items": [
-    {
-      "productId": "prod123",
-      "quantity": 2
+      ],
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
     }
   ],
-  "shippingAddress": "123 Main St",
-  "phone": "+1234567890",
-  "email": "user@example.com"
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 4,
+    "totalPages": 1
+  }
 }
 ```
 
-#### Get Single Order
-```http
-GET /api/orders/{id}
-```
+### GET /api/admin/orders/[id]
+**Get a single order**
 
-#### Update Order Status
-```http
-PUT /api/orders/{id}
-```
+**Response:** Order object with user and items included
 
-**Body:**
+### PUT /api/admin/orders/[id]
+**Update order status**
+
+**Request Body:**
 ```json
 {
-  "status": "CONFIRMED",
-  "paid": true
+  "status": "SHIPPED",
+  "paid": true,
+  "shippingAddress": "Updated address",
+  "phone": "+1-555-9999",
+  "email": "updated@email.com"
 }
 ```
 
-### 6. Admin API
+**All fields are optional**
 
-#### Get All Orders (Admin)
-```http
-GET /api/admin/orders?status=pending&page=1&limit=20
-```
+**Response:** Updated order object
+
+### DELETE /api/admin/orders/[id]
+**Delete an order**
+
+**Response:** `200 OK` with success message
+
+---
 
 ## Order Status Values
-- `PENDING`: Order created, waiting for confirmation
-- `CONFIRMED`: Order confirmed by admin
-- `SHIPPED`: Order has been shipped
-- `DELIVERED`: Order has been delivered
-- `CANCELLED`: Order has been cancelled
+
+- `PENDING` - Order is placed but not yet confirmed
+- `CONFIRMED` - Order is confirmed and being processed
+- `SHIPPED` - Order has been shipped
+- `DELIVERED` - Order has been delivered
+- `CANCELLED` - Order has been cancelled
+
+---
 
 ## Error Responses
 
-All endpoints return errors in the following format:
+All endpoints return consistent error responses:
+
 ```json
 {
-  "error": "Error message"
+  "error": "Error message description"
 }
 ```
 
-Common HTTP status codes:
-- `200`: Success
-- `201`: Created
-- `400`: Bad Request
-- `404`: Not Found
-- `500`: Internal Server Error
+**Common HTTP Status Codes:**
+- `400` - Bad Request (missing required fields)
+- `404` - Not Found (resource doesn't exist)
+- `409` - Conflict (e.g., category name already exists)
+- `500` - Internal Server Error
 
-## Usage Examples
-
-### Frontend Integration
-
-```javascript
-// Get products
-const response = await fetch('/api/products?page=1&limit=10');
-const data = await response.json();
-
-// Add to cart
-const cartResponse = await fetch('/api/cart', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    userId: 'user123',
-    productId: 'prod123',
-    quantity: 1
-  })
-});
-
-// Create order
-const orderResponse = await fetch('/api/orders', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    userId: 'user123',
-    items: [{ productId: 'prod123', quantity: 2 }],
-    shippingAddress: '123 Main St',
-    phone: '+1234567890',
-    email: 'user@example.com'
-  })
-});
-```
+---
 
 ## Database Schema
 
-The backend uses the following main entities:
-- **Users**: Customer information
-- **Categories**: Product categories
-- **Products**: Product information with stock management
-- **CartItems**: Shopping cart items
-- **Orders**: Order information with status tracking
-- **OrderItems**: Individual items in orders
+The API uses the following Prisma schema:
 
-## Next Steps
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+  cartItems CartItem[]
+}
 
-1. **Authentication**: Implement proper user authentication
-2. **Payment Integration**: Add payment processing (Stripe, PayPal, etc.)
-3. **File Upload**: Add image upload functionality
-4. **Email Notifications**: Send order confirmation emails
-5. **Inventory Management**: Add low stock alerts
-6. **Analytics**: Add order and sales analytics
-7. **Search**: Implement full-text search
-8. **Caching**: Add Redis caching for better performance 
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  imageUrl    String
+  stock       Int
+  faceShape   String?
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  total           Float
+  status          OrderStatus @default(PENDING)
+  paid            Boolean     @default(false)
+  shippingAddress String?
+  phone           String?
+  email           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+``` 

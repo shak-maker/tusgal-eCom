@@ -1,6 +1,7 @@
 import ContainerTwo from "@/components/second-container";
 import Header from "../components/Header";
 import ContainerOne from "../components/first-container";
+import ContainerThree from "@/components/third-container";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Header />
       <ContainerOne />
       <ContainerTwo />
+      <ContainerThree/>
     </>
   );
 }

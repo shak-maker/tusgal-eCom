@@ -10,7 +10,7 @@ function Header() {
 
   return (
     <>
-      <div className="sticky w-full h-[80px] md:h-[100px] lg:h-[100px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
+      <div className="fixed top-0 left-0 z-50 w-full h-[80px] md:h-[100px] lg:h-[100px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
         <a href="" className="w-[100px] md:w-[120px] lg:w-[120px] h-[30px] md:h-[40px] lg:h-[40px] flex items-center md:ml-5">
           <img src="/brandLogo.png" alt="Brand Logo" className="ml-5 md:ml-8" />
         </a>
@@ -51,12 +51,13 @@ function Header() {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div className={`md:hidden fixed top-[80px] left-0 w-full bg-white z-50 transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
-        <ul className="flex flex-col items-center space-y-4">
+      <div className={`md:hidden fixed top-[80px] left-0 w-full bg-white z-50 transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+        <ul className="flex flex-col items-center space-y-4 px-4 pb-4">
           <li>
             <a 
                 href="#home" 
                 className="text-[rgba(255,0,0,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
             >
                 Нүүр
             </a>
@@ -65,6 +66,7 @@ function Header() {
             <a 
                 href="#about" 
                 className="text-[rgba(94,172,221,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
             >
                 Шил авах
             </a>
@@ -73,6 +75,7 @@ function Header() {
             <a 
                 href="#about" 
                 className="text-[rgba(94,172,221,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
             >
                 Нүүрний хэлбэр олох
             </a>
@@ -81,6 +84,7 @@ function Header() {
             <a 
                 href="#about" 
                 className="text-[rgba(94,172,221,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
             >
                 Зааварчилгаа
             </a>

@@ -3,38 +3,51 @@
 function ContainerThree(){
     return (
     <>
+    
         <section>
-            <div>
-                <h1>Тусгалаас худалдан авах тухай</h1>
-                <div>
-                    <img src="" alt="" />
-                    <div>
-                        <h3>PD(Нүдний зай), Нүүрний өргөн</h3>
-                        <p>Таны нүдний хүүхэн харааны хоорондох зай болон нүүрний 
-                        шанааны өргөнийг авж таны нүүрэнд тохирсон шилийг санал болгоно.</p>
+            <div className="grid grid-cols-1 bg-gray-50 py-10 text-center px-2 sm:px-4">
+                <h1 className="text-2xl sm:text-3xl font-medium mb-10">Тусгалаас худалдан авах тухай</h1>
+                <div className="flex flex-col sm:flex-row gap-8">
+                    <div className="flex flex-col justify-between items-center gap-4">
+                        <div className="border-2 border-[rgba(193,223,241,0)] bg-[rgba(193,223,241,0.2)] rounded-lg p-4">
+                            <img src="./emote1.png" alt="" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 border-gray-200">PD(Нүдний зай), Нүүрний өргөн</h3>
+                            <p className="text-md leading-relaxed text-gray-800">Таны нүдний хүүхэн харааны хоорондох зай болон нүүрний 
+                            шанааны өргөнийг авж таны нүүрэнд тохирсон шилийг санал болгоно.</p>
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <img src="" alt="" />
-                    <div>
-                        <h3>PD(Нүдний зай), Нүүрний өргөн</h3>
-                        <p>Таны нүдний хүүхэн харааны хоорондох зай болон нүүрний 
-                        шанааны өргөнийг авж таны нүүрэнд тохирсон шилийг санал болгоно.</p>
+                    <div className="flex flex-col justify-between items-center gap-4">
+                        <div className="border-2 border-[rgba(193,223,241,0)] bg-[rgba(193,223,241,0.2)] rounded-lg p-4">
+                            <img src="./emote2.png" alt="" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 border-gray-200">Зүүж үзэх</h3>
+                            <p className="text-md leading-relaxed text-gray-800">Та санал болгосон шилнүүд дундаас сонголтоо хийн
+                                Тусгалын зүүж үзэх функцыг ашиглан яг л дэлгүүрт 
+                                зүүж үзэж буй мэтээр өөрийгөө харах боломжтой.
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <img src="" alt="" />
-                    <div>
-                        <h3>PD(Нүдний зай), Нүүрний өргөн</h3>
-                        <p>Таны нүдний хүүхэн харааны хоорондох зай болон нүүрний 
-                        шанааны өргөнийг авж таны нүүрэнд тохирсон шилийг санал болгоно.</p>
+                    <div className="flex flex-col justify-between items-center gap-4">
+                        <div className="border-2 border-[rgba(193,223,241,0)] bg-[rgba(193,223,241,0.2)] rounded-lg p-4">
+                            <img src="./emote3.png" alt="" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold mb-6 border-gray-200">Хүргэлтээр авах</h3>
+                            <p className="text-md leading-relaxed text-gray-800">Таны сонгон авсан нүдний шилийг ТОКИ-оор түргэн
+                                шуурхайгаар тодорхой хаягт тань хүргэнэ.
+                            </p>
+                        </div>
                     </div>
                 </div>
             
             </div>
         </section>    
+
     </>
   );
 }

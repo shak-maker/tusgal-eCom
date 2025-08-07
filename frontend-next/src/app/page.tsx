@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import ContainerOne from "../components/first-container";
 import ContainerThree from "@/components/third-container";
 import ProductGrid from "../components/ProductGrid";
+import ContainerFour from "@/components/fourth-container";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <ContainerTwo />
       <ContainerThree/>
       <ProductGrid />
+      <ContainerFour/>
     </>
   );
 }

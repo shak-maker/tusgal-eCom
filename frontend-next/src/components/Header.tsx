@@ -64,7 +64,7 @@ function Header() {
         </nav>
 
         {/* Shopping Cart (Hidden on Mobile) */}
-        <Link href="/cart" className="absolute right-0 md:flex items-center border-l-2 border-gray-500 pl-2 mr-15 sm:mr-10 gap-5 relative group">
+        <Link href="/cart" className="md:flex items-center border-l-2 border-gray-500 pl-2 mr-15 sm:mr-10 gap-5 relative group">
           <div className="relative">
             <img src="/shopping.png" className="transition-transform duration-300 hover:scale-110 ml-5" alt="Shopping" />
             {cartCount > 0 && (
@@ -78,7 +78,7 @@ function Header() {
         {/* Mobile Hamburger Button */}
         <button 
           onClick={toggleMenu}
-          className="absolute right-30 md:hidden lg:hidden flex flex-col justify-center items-center w-8 h-8 ml-auto mr-4"
+          className="absolute right-30 md:hidden lg:hidden flex flex-col justify-center items-center w-8 h-8 ml-auto mr-10"
           aria-label="Toggle Menu"
         >
           <span className={`block w-6 h-0.5 bg-black transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-0' : 'mb-1.5'}`}></span>

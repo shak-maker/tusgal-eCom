@@ -6,7 +6,11 @@ module.exports = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily:{
+        Jakarta: ['Plus Jakarta Sans'],
+      }
+    },
   },
   plugins: [
     require("tw-animate-css"),

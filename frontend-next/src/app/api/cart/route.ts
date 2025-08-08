@@ -4,15 +4,21 @@ import { getOrCreateTempUserId } from '@/lib/cookies';
 import { prisma } from '@/lib/db';
 
 export async function GET() {
-  const userId = await getOrCreateTempUserId();
+  try {
+    const userId = await getOrCreateTempUserId();
 
-  const items = await prisma.cartItem.findMany({
-    where: { userId },
-    include: { product: true },
-  });
+    const items = await prisma.cartItem.findMany({
+      where: { userId },
+      include: { product: true },
+    });
 
-  return NextResponse.json(items);
+    return NextResponse.json(items);
+  } catch (error) {
+    console.error('[CART GET ERROR]', error);
+    return NextResponse.json({ error: 'Failed to fetch cart' }, { status: 500 });
+  }
 }
+
 export async function POST(req: NextRequest) {
   try {
     const userId = await getOrCreateTempUserId();

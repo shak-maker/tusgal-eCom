@@ -2,7 +2,6 @@
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Star, StarHalf } from "lucide-react";
 import { useState } from "react";
-import { motion } from 'framer-motion';
 
 interface Testimonial {
   id: number;

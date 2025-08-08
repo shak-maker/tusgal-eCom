@@ -6,6 +6,7 @@ import ProductGrid from "../components/ProductGrid";
 import ContainerFour from "@/components/fourth-container";
 import ContainerFive from "@/components/fifth-container";
 import ContainerSix from "@/components/sixth-container";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       <ContainerFour/>
       <ContainerFive/>
       <ContainerSix/>
+      <Footer/>
     </>
   );
 }

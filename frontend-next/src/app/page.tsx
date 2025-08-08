@@ -4,6 +4,7 @@ import ContainerOne from "../components/first-container";
 import ContainerThree from "@/components/third-container";
 import ProductGrid from "../components/ProductGrid";
 import ContainerFour from "@/components/fourth-container";
+import ContainerFive from "@/components/fifth-container";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <ContainerThree/>
       <ProductGrid />
       <ContainerFour/>
+      <ContainerFive/>
     </>
   );
 }

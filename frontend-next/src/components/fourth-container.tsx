@@ -31,7 +31,7 @@ function ContainerFour(){
 
               <div className="flex flex-col justify-center items-center md:ml-10 gap-5 bg-gray-50">
                 {/* Customer Support */}
-                <Card className="max-h-[140] p-3 bg-gray-100 hover:bg-gray-100 transition-colors border-0 shadow-none">
+                <Card className="max-h-[140] p-3 bg-gray-100 hover:bg-white transition-colors border-0 shadow-none">
                   <div className="flex flex-row items-start gap-5">
                     <Phone className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
                     <div>

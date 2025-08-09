@@ -2,8 +2,8 @@ export function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300 py-12 px-4">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-center md:grid-cols-3 gap-8">
+          <div >
             <h3 className="text-white text-xl font-bold mb-4">Tusgal</h3>
             <p className="hover:text-white transition">Tusgal vision</p>
           </div>
@@ -38,8 +38,8 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p>©2025 Full Stack Gang. All rights reserved</p>
             <div className="flex gap-8 mt-4 md:mt-0">
-              <p>Нууцлал ба бодлого</p>
-              <p>Нөхцөл</p>
+              <a className="hover:text-white transition">Нууцлал ба бодлого</a>
+              <a className="hover:text-white transition">Нөхцөл</a>
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ function ContainerSix(){
     {
       id: 1,
       rating: 5,
-      text: "Ymar gang nudnii shii be bitch ayo gang gang nigga gangster nigga this glasses are my type shit for real my nega Yeaash uws mungu oino gaihamshiiilig shi",
+      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
       author: "B Tamir",
       location: "Chicago, Illinois",
       image: "./itachi222.png"
@@ -25,7 +25,7 @@ function ContainerSix(){
     {
       id: 2,
       rating: 3.2,
-      text: "Odoo bol Mongolim hip hopd wonder Art I gollono harin mongolim shilend Tusgal gollono. Ene shillig awsnaas hoish ih olon huntei muudaltsaj bn gehdee gan.",
+      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
       author: "TukawAP",
       location: "Kanzas, US",
       image: "./itachi222.png"
@@ -33,7 +33,7 @@ function ContainerSix(){
     {
       id: 3,
       rating: 4.5,
-      text: "Bi oligohguinee ene nudnii shii buuuuuur YAAYGEEDAAN. Aimar shaaj baina har shii awsan har shiltei shunuuur garsan harshiltai boji taarsan ayooo loichihson in da house.",
+      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
       author: "Ganjinsor",
       location: "Usaarbaatar",
       image: "./itachi222.png"
@@ -41,7 +41,7 @@ function ContainerSix(){
     {
       id: 4,
       rating: 4.5,
-      text: "Bi oligohguinee ene nudnii shii buuuuuur YAAYGEEDAAN. Aimar shaaj baina har shii awsan har shiltei shunuuur garsan harshiltai boji taarsan ayooo loichihson in da house.",
+      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
       author: "Ganjinsor",
       location: "Usaarbaatar",
       image: "./itachi222.png"
@@ -49,7 +49,7 @@ function ContainerSix(){
     {
       id: 5,
       rating: 1,
-      text: "Bi oligohguiljh ghfdshgkj fdsgkfh gjdfhgjhf dsjghfdghdfsjgh dfsjhgfdsjhgdfjhg fdg hlfd glkfdsg j;h gjlsfdglfdjhglfdjhgljfhdljgh sdlnee ene nudnii shii buuuuuur YAAYGEEDAAN. Aimar shaaj baina har shii awsan har shiltei shunuuur garsan harshiltai boji taarsan ayooo loichihson in da house.",
+      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
       author: "Ganjinsor",
       location: "Usaarbaatar",
       image: "./itachi222.png"

@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 // GET /api/admin/products/[id] - get single product
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         category: true
       }
@@ -27,8 +27,8 @@ export async function GET(
 
 // PUT /api/admin/products/[id] - update product
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const body = await req.json();
@@ -40,7 +40,7 @@ export async function PUT(
 
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     if (!existingProduct) {
@@ -48,7 +48,7 @@ export async function PUT(
     }
 
     const updatedProduct = await prisma.product.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: {
         name,
         description,
@@ -72,13 +72,13 @@ export async function PUT(
 
 // DELETE /api/admin/products/[id] - delete product
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     // Check if product exists
     const product = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     if (!product) {
@@ -86,7 +86,7 @@ export async function DELETE(
     }
 
     await prisma.product.delete({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     return NextResponse.json({ message: 'Product deleted successfully' });

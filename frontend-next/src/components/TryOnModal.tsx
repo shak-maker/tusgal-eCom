@@ -128,7 +128,7 @@ export default function TryOnModal({ isOpen, onClose, product }: TryOnModalProps
           <div className="mt-8 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-semibold text-blue-900 mb-2">Зааварчилгаа:</h4>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Царайны зураг авахын тулд "Зураг авах" товчийг дарна уу</li>
+              <li>• Царайны зураг авахын тулд &quot;Зураг авах&quot; товчийг дарна уу</li>
               <li>• Зураг авсны дараа шилээ зүүж үзэх боломжтой</li>
               <li>• Үр дүнг хадгалахын тулд татаж авах товчийг дарна уу</li>
               <li>• Дахин зураг авахын тулд сэргээх товчийг дарна уу</li>

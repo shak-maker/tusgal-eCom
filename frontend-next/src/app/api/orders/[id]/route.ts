@@ -43,6 +43,7 @@ export async function PUT(
     const body = await request.json();
     const { status, paid } = body;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     if (status) updateData.status = status;
     if (paid !== undefined) updateData.paid = paid;

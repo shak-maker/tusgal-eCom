@@ -39,14 +39,7 @@ function Header() {
     }
   }
 
-<<<<<<< HEAD
   const smoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-=======
-  const smoothScroll = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    id: string
-  ) => {
->>>>>>> 284ed1eddd7889dd432ba4c695ca3c77b4ed358b
     e.preventDefault();
     const element = document.getElementById(id);
       if (element) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getOrCreateTempUserId } from '@/lib/cookies';
+import { buildOrderEmailHtml, sendEmail } from '@/lib/email';
 
 // GET - Get user's orders
 export async function GET(request: Request) {
@@ -170,6 +171,44 @@ export async function POST(req: Request) {
         }
       }
     });
+
+    // Send confirmation emails (best-effort; do not block response on error)
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL
+      if (orderWithItems) {
+        const html = buildOrderEmailHtml({
+          orderId: orderWithItems.id,
+          total: orderWithItems.total,
+          items: orderWithItems.items.map((i) => ({
+            name: i.product.name,
+            quantity: i.quantity,
+            price: i.price,
+          })),
+          shippingAddress: orderWithItems.shippingAddress,
+          phone: orderWithItems.phone,
+          email: orderWithItems.email || email,
+        })
+
+        // Customer
+        if (orderWithItems.email) {
+          await sendEmail({
+            to: orderWithItems.email,
+            subject: `Захиалга баталгаажив: ${orderWithItems.id}`,
+            html,
+          })
+        }
+        // Admin
+        if (adminEmail) {
+          await sendEmail({
+            to: adminEmail,
+            subject: `Шинэ захиалга: ${orderWithItems.id}`,
+            html,
+          })
+        }
+      }
+    } catch (emailErr) {
+      console.error('[ORDER EMAIL ERROR]', emailErr)
+    }
 
     return NextResponse.json(orderWithItems, { status: 201 });
   } catch (err) {

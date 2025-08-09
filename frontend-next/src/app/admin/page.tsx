@@ -866,6 +866,12 @@ const GlassesAdminDashboard = () => {
                       {selectedOrder.phone && (
                         <p><strong>Phone:</strong> {selectedOrder.phone}</p>
                       )}
+                      {'latitude' in selectedOrder && (selectedOrder as any).latitude != null && (
+                        <p><strong>Latitude:</strong> {String((selectedOrder as any).latitude)}</p>
+                      )}
+                      {'longitude' in selectedOrder && (selectedOrder as any).longitude != null && (
+                        <p><strong>Longitude:</strong> {String((selectedOrder as any).longitude)}</p>
+                      )}
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Items:</h4>

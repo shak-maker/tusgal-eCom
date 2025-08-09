@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getOrCreateTempUserId } from '@/lib/cookies';
 
 // GET - Get user's orders
 export async function GET(request: Request) {
@@ -46,12 +47,15 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { 
-      userId, 
       items, 
       shippingAddress, 
       phone, 
-      email 
+      email,
+      latitude,
+      longitude,
     } = body;
+
+    const userId = await getOrCreateTempUserId();
 
     if (!userId || !items || !shippingAddress || !phone || !email) {
       return NextResponse.json({ 
@@ -101,7 +105,9 @@ export async function POST(req: Request) {
           total,
           shippingAddress,
           phone,
-          email
+          email,
+          latitude: typeof latitude === 'number' ? latitude : null,
+          longitude: typeof longitude === 'number' ? longitude : null,
         }
       });
 

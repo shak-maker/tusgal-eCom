@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react'
-import 'leaflet/dist/leaflet.css'
-import { MapContainer, TileLayer, CircleMarker, useMapEvents } from 'react-leaflet'
-import type { LatLngExpression } from 'leaflet'
+import dynamic from 'next/dynamic'
+
+const MapPicker = dynamic(() => import('./MapPicker'), { ssr: false })
 
 type CartItem = {
   id: string
@@ -77,18 +77,7 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  function MapClickHandler({
-    onSelect,
-  }: {
-    onSelect: (lat: number, lng: number) => void
-  }) {
-    useMapEvents({
-      click(e: { latlng: { lat: number; lng: number } }) {
-        onSelect(e.latlng.lat, e.latlng.lng)
-      },
-    })
-    return null
-  }
+  // Map click handled inside MapPicker client-only component
 
   const getEmailSuggestions = (): string[] => {
     const email = formData.email.trim()
@@ -437,41 +426,17 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="h-60 overflow-hidden rounded-lg border border-gray-300">
-                    {(() => {
-                      const mapCenter: LatLngExpression = selectedLocation
-                        ? [selectedLocation.lat, selectedLocation.lng]
-                        : [47.92123, 106.918556]
-                      return (
-                        <MapContainer
-                      center={mapCenter}
-                      zoom={12}
-                      scrollWheelZoom={false}
-                      style={{ height: '100%', width: '100%' }}
-                    >
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                      <MapClickHandler
-                        onSelect={(lat, lng) => {
-                          setSelectedLocation({ lat, lng })
-                          setFormData((prev) => ({
-                            ...prev,
-                            latitude: String(lat.toFixed(6)),
-                            longitude: String(lng.toFixed(6)),
-                          }))
-                        }}
-                      />
-                      {selectedLocation && (
-                        <CircleMarker
-                          center={[selectedLocation.lat, selectedLocation.lng] as LatLngExpression}
-                          radius={8}
-                          pathOptions={{ color: '#111827', fillColor: '#111827', fillOpacity: 0.9 }}
-                        />
-                      )}
-                    </MapContainer>
-                      )
-                    })()}
+                    <MapPicker
+                      selectedLocation={selectedLocation}
+                      onSelect={(lat, lng) => {
+                        setSelectedLocation({ lat, lng })
+                        setFormData((prev) => ({
+                          ...prev,
+                          latitude: String(lat.toFixed(6)),
+                          longitude: String(lng.toFixed(6)),
+                        }))
+                      }}
+                    />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

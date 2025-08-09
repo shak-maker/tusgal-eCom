@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Star, StarHalf } from "lucide-react";

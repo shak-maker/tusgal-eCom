@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 // GET - Get order by ID
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: any
 ) {
   try {
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         user: true,
         items: {
@@ -36,8 +36,8 @@ export async function GET(
 
 // PUT - Update order status
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: any
 ) {
   try {
     const body = await request.json();
@@ -49,7 +49,7 @@ export async function PUT(
     if (paid !== undefined) updateData.paid = paid;
 
     const order = await prisma.order.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: updateData,
       include: {
         user: true,

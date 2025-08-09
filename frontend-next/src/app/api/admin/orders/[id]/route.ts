@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 // GET /api/admin/orders/[id] - get single order
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         user: true,
         items: {
@@ -36,8 +36,8 @@ export async function GET(
 
 // PUT /api/admin/orders/[id] - update order status
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const body = await req.json();
@@ -45,7 +45,7 @@ export async function PUT(
 
     // Check if order exists
     const existingOrder = await prisma.order.findUnique({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     if (!existingOrder) {
@@ -62,7 +62,7 @@ export async function PUT(
     if (email) updateData.email = email;
 
     const updatedOrder = await prisma.order.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: updateData,
       include: {
         user: true,
@@ -87,13 +87,13 @@ export async function PUT(
 
 // DELETE /api/admin/orders/[id] - delete order
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     // Check if order exists
     const order = await prisma.order.findUnique({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     if (!order) {
@@ -102,7 +102,7 @@ export async function DELETE(
 
     // Delete order (this will cascade delete order items)
     await prisma.order.delete({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     return NextResponse.json({ message: 'Order deleted successfully' });

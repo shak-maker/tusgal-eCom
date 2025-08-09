@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getOrCreateTempUserId } from '@/lib/cookies';
+import { buildOrderEmailHtml, sendEmail } from '@/lib/email';
 
 // GET - Get user's orders
 export async function GET(request: Request) {
@@ -46,14 +48,17 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { 
-      userId, 
       items, 
       shippingAddress, 
       phone, 
-      email 
+      email,
+      latitude,
+      longitude,
     } = body;
 
-    if (!userId || !items || !shippingAddress || !phone || !email) {
+    const tempUserId = await getOrCreateTempUserId();
+
+    if (!tempUserId || !items || !shippingAddress || !phone || !email) {
       return NextResponse.json({ 
         error: 'User ID, items, shipping address, phone, and email are required' 
       }, { status: 400 });
@@ -94,14 +99,30 @@ export async function POST(req: Request) {
 
     // Create order with transaction
     const order = await prisma.$transaction(async (tx) => {
+      // Ensure we have a User associated by email
+      const user = await tx.user.upsert({
+        where: { email },
+        update: {
+          phone: phone ?? undefined,
+          address: shippingAddress ?? undefined,
+        },
+        create: {
+          email,
+          phone: phone ?? undefined,
+          address: shippingAddress ?? undefined,
+        },
+      })
+
       // Create the order
       const newOrder = await tx.order.create({
         data: {
-          userId,
+          userId: user.id,
           total,
           shippingAddress,
           phone,
-          email
+          email,
+          latitude: typeof latitude === 'number' ? latitude : null,
+          longitude: typeof longitude === 'number' ? longitude : null,
         }
       });
 
@@ -129,7 +150,7 @@ export async function POST(req: Request) {
 
       // Clear user's cart
       await tx.cartItem.deleteMany({
-        where: { userId }
+        where: { userId: tempUserId }
       });
 
       return newOrder;
@@ -150,6 +171,44 @@ export async function POST(req: Request) {
         }
       }
     });
+
+    // Send confirmation emails (best-effort; do not block response on error)
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL
+      if (orderWithItems) {
+        const html = buildOrderEmailHtml({
+          orderId: orderWithItems.id,
+          total: orderWithItems.total,
+          items: orderWithItems.items.map((i) => ({
+            name: i.product.name,
+            quantity: i.quantity,
+            price: i.price,
+          })),
+          shippingAddress: orderWithItems.shippingAddress,
+          phone: orderWithItems.phone,
+          email: orderWithItems.email || email,
+        })
+
+        // Customer
+        if (orderWithItems.email) {
+          await sendEmail({
+            to: orderWithItems.email,
+            subject: `Захиалга баталгаажив: ${orderWithItems.id}`,
+            html,
+          })
+        }
+        // Admin
+        if (adminEmail) {
+          await sendEmail({
+            to: adminEmail,
+            subject: `Шинэ захиалга: ${orderWithItems.id}`,
+            html,
+          })
+        }
+      }
+    } catch (emailErr) {
+      console.error('[ORDER EMAIL ERROR]', emailErr)
+    }
 
     return NextResponse.json(orderWithItems, { status: 201 });
   } catch (err) {

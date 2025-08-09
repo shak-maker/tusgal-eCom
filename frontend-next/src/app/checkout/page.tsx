@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+const MapPicker = dynamic(() => import('./MapPicker'), { ssr: false })
 
 type CartItem = {
   id: string
@@ -24,9 +27,24 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
     address: '',
+    district: '',
     city: '',
-    postalCode: ''
+    postalCode: '',
+    latitude: '',
+    longitude: ''
   })
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [phoneTouched, setPhoneTouched] = useState(false)
+  const emailDomains = [
+    'gmail.com',
+    'yahoo.com',
+    'outlook.com',
+    'icloud.com',
+    'hotmail.com',
+    'proton.me',
+    'yandex.com'
+  ]
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false)
 
   useEffect(() => {
     async function fetchCart() {
@@ -46,16 +64,79 @@ export default function CheckoutPage() {
 
   const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const isPhoneValid = /^\d{8}$/.test(formData.phone)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name } = e.target
+    let { value } = e.target
+
+    if (name === 'phone') {
+      // Only allow digits and limit to 8 characters
+      const digitsOnly = value.replace(/\D/g, '')
+      value = digitsOnly.slice(0, 8)
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  // Map click handled inside MapPicker client-only component
+
+  const getEmailSuggestions = (): string[] => {
+    const email = formData.email.trim()
+    if (!email) return []
+    const [localPart, domainPart = ''] = email.split('@')
+    if (!localPart) return []
+
+    const normalizedDomainPart = domainPart.toLowerCase()
+    const filtered = emailDomains.filter((d) =>
+      normalizedDomainPart ? d.startsWith(normalizedDomainPart) : true
+    )
+    return filtered.slice(0, 5).map((d) => `${localPart}@${d}`)
+  }
+
+  const applyEmailSuggestion = (suggestion: string) => {
+    setFormData((prev) => ({ ...prev, email: suggestion }))
+    setShowEmailSuggestions(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement order creation
-    alert('Order placement functionality will be implemented next')
+    try {
+      const items = cartItems.map((ci) => ({ productId: ci.product.id, quantity: ci.quantity }))
+      const shippingAddress = [
+        formData.address,
+        formData.district && `Дүүрэг: ${formData.district}`,
+        formData.city && `Хот: ${formData.city}`,
+        formData.postalCode && `ЗИП: ${formData.postalCode}`,
+      ]
+        .filter(Boolean)
+        .join(', ')
+
+      const payload = {
+        items,
+        shippingAddress,
+        phone: formData.phone,
+        email: formData.email,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
+      }
+
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.error || 'Order creation failed')
+      }
+
+      alert('Захиалга амжилттай!')
+    } catch (err) {
+      console.error(err)
+      alert('Алдаа гарлаа. Дахин оролдоно уу.')
+    }
   }
 
   if (loading) {
@@ -198,7 +279,7 @@ export default function CheckoutPage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                     />
                   </div>
-                  <div>
+                  <div className="relative">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                       Э-майл
                     </label>
@@ -208,9 +289,28 @@ export default function CheckoutPage() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      onFocus={() => setShowEmailSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 120)}
                       required
+                      autoComplete="email"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                     />
+                    {showEmailSuggestions && getEmailSuggestions().length > 0 && (
+                      <ul className="absolute z-10 mt-1 w-full border border-gray-200 bg-white rounded-md shadow-lg max-h-56 overflow-auto">
+                        {getEmailSuggestions().map((s) => (
+                          <li key={s}>
+                            <button
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100"
+                              onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => e.preventDefault()} 
+                              onClick={() => applyEmailSuggestion(s)}
+                            >
+                              {s}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
 
@@ -224,9 +324,18 @@ export default function CheckoutPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    onBlur={() => setPhoneTouched(true)}
                     required
+                    inputMode="numeric"
+                    minLength={8}
+                    maxLength={8}
+                    pattern="^[0-9]{8}$"
+                    title="8 digits required (e.g. 12345678)"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   />
+                  {phoneTouched && !isPhoneValid && (
+                    <p className="mt-1 text-sm text-red-600">Утасны дугаар 8 цифр байх ёстой. Жишээ: 12345678</p>
+                  )}
                 </div>
 
                 <div>
@@ -260,14 +369,14 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                      ЗИП код
+                    <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
+                      Дүүрэг
                     </label>
                     <input
                       type="text"
-                      id="postalCode"
-                      name="postalCode"
-                      value={formData.postalCode}
+                      id="district"
+                      name="district"
+                      value={formData.district}
                       onChange={handleInputChange}
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
@@ -275,9 +384,100 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+                    ЗИП код
+                  </label>
+                  <input
+                    type="text"
+                    id="postalCode"
+                    name="postalCode"
+                    value={formData.postalCode}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Байршил (газрын зураг дээр товшоод сонгоно уу)</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="Хаяг хайх (ж: Сүхбаатар дүүрэг 1-р хороо)"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          const q = (e.target as HTMLInputElement).value.trim()
+                          if (!q) return
+                          try {
+                            const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`)
+                            const data: Array<{ lat: string; lon: string }> = await r.json()
+                            if (data && data[0]) {
+                              const lat = parseFloat(data[0].lat)
+                              const lon = parseFloat(data[0].lon)
+                              setSelectedLocation({ lat, lng: lon })
+                              setFormData((prev) => ({
+                                ...prev,
+                                latitude: String(lat.toFixed(6)),
+                                longitude: String(lon.toFixed(6)),
+                              }))
+                            }
+                          } catch (err) {
+                            console.error('Search failed', err)
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="h-60 overflow-hidden rounded-lg border border-gray-300">
+                    <MapPicker
+                      selectedLocation={selectedLocation}
+                      onSelect={(lat, lng) => {
+                        setSelectedLocation({ lat, lng })
+                        setFormData((prev) => ({
+                          ...prev,
+                          latitude: String(lat.toFixed(6)),
+                          longitude: String(lng.toFixed(6)),
+                        }))
+                      }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-1">Өргөрөг</label>
+                      <input
+                        type="text"
+                        id="latitude"
+                        name="latitude"
+                        value={formData.latitude}
+                        onChange={handleInputChange}
+                        readOnly
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-1">Уртраг</label>
+                      <input
+                        type="text"
+                        id="longitude"
+                        name="longitude"
+                        value={formData.longitude}
+                        onChange={handleInputChange}
+                        readOnly
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   type="submit"
-                  className="w-full bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                  disabled={!isPhoneValid}
+                  className={`w-full py-3 px-6 rounded-lg transition-colors font-medium ${
+                    isPhoneValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
                   Захиалга хийх
                 </button>

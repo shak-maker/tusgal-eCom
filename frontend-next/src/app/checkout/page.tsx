@@ -34,6 +34,7 @@ export default function CheckoutPage() {
     longitude: ''
   })
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [phoneTouched, setPhoneTouched] = useState(false)
   const emailDomains = [
     'gmail.com',
     'yahoo.com',
@@ -63,6 +64,7 @@ export default function CheckoutPage() {
 
   const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const isPhoneValid = /^\d{8}$/.test(formData.phone)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = e.target
@@ -322,14 +324,18 @@ export default function CheckoutPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    onBlur={() => setPhoneTouched(true)}
                     required
-                     inputMode="numeric"
-                     minLength={8}
-                     maxLength={8}
-                     pattern="^\\d{8}$"
-                     title="8 digits required"
+                    inputMode="numeric"
+                    minLength={8}
+                    maxLength={8}
+                    pattern="^[0-9]{8}$"
+                    title="8 digits required (e.g. 12345678)"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   />
+                  {phoneTouched && !isPhoneValid && (
+                    <p className="mt-1 text-sm text-red-600">Утасны дугаар 8 цифр байх ёстой. Жишээ: 12345678</p>
+                  )}
                 </div>
 
                 <div>
@@ -468,7 +474,10 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                  disabled={!isPhoneValid}
+                  className={`w-full py-3 px-6 rounded-lg transition-colors font-medium ${
+                    isPhoneValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
                   Захиалга хийх
                 </button>

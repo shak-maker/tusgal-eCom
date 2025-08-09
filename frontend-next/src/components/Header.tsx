@@ -40,7 +40,7 @@ function Header() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 z-50 w-full h-[80px] md:h-[100px] lg:h-[100px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
+      <div className="fixed top-0 left-0 z-50 w-full h-[60px] md:h-[100px] lg:h-[80px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
         <Link href="/" className="w-[100px] md:w-[120px] lg:w-[120px] h-[30px] md:h-[40px] lg:h-[40px] flex items-center md:ml-5">
           <img src="/brandLogo.png" alt="Brand Logo" className="ml-5 md:ml-8" />
         </Link>
@@ -64,9 +64,9 @@ function Header() {
         </nav>
 
         {/* Shopping Cart (Hidden on Mobile) */}
-        <Link href="/cart" className="md:flex items-center border-l-2 border-gray-500 pl-2 mr-15 sm:mr-10 gap-5 relative group">
-          <div className="relative">
-            <img src="/shopping.png" className="transition-transform duration-300 hover:scale-110 ml-5" alt="Shopping" />
+        <Link href="/cart" className="md:flex items-center border-l-2 border-gray-500 pl-2 mr-5 sm:mr-10 gap-5 group">
+          <div className="relative left-3">
+            <img src="./shopping.png" className="transition-transform duration-300 hover:scale-110" alt="Shopping" />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse">
                 {cartCount > 99 ? '99+' : cartCount}
@@ -78,7 +78,7 @@ function Header() {
         {/* Mobile Hamburger Button */}
         <button 
           onClick={toggleMenu}
-          className="absolute right-30 md:hidden lg:hidden flex flex-col justify-center items-center w-8 h-8 ml-auto mr-10"
+          className="absolute right-15 sm:right-20 md:hidden lg:hidden flex flex-col justify-center items-center w-8 h-8 ml-auto mr-10"
           aria-label="Toggle Menu"
         >
           <span className={`block w-6 h-0.5 bg-black transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-0' : 'mb-1.5'}`}></span>

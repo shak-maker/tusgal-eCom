@@ -39,10 +39,10 @@ function Header() {
     }
   }
 
-  const smoothScroll = (e, id) => {
+  const smoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const element = document.getElementById(id);
-    if (element) {
+      if (element) {
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'center'
@@ -105,33 +105,33 @@ function Header() {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div className={`md:hidden fixed top-[80px] left-0 w-full bg-white z-50 transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+      <div className={`md:hidden fixed top-[60px] left-0 w-full bg-white z-50 transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
         <ul className="flex flex-col items-center space-y-4 px-4 pb-4">
           <li>
             <a 
                 href="#home" 
                 className="text-[rgba(255,0,0,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={(e) => smoothScroll(e, 'first')}
             >
                 Нүүр
             </a>
             </li>
             <li>
-            <Link 
-                href="/products" 
+            <a 
+                href="#second" 
                 className="text-[rgba(94,172,221,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={(e) => smoothScroll(e, 'second')}
             >
-                Шил авах
-            </Link>
+                Нүүрний хэлбэр олох
+            </a>
             </li>
             <li>
             <a 
-                href="#about" 
+                href="#products" 
                 className="text-[rgba(94,172,221,1)] font-bold text-lg md:text-xl hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={(e) => smoothScroll(e, 'products')}
             >
-                Нүүрний хэлбэр олох
+                Шил авах
             </a>
             </li>
             <li>

@@ -8,7 +8,7 @@ export function Footer() {
             <p className="hover:text-white transition">Tusgal vision</p>
           </div>
 
-          <div className=" flex flex-row justify-evenly items-start md:ml-15 lg:ml-20 gap-8 md:gap-12">
+          <div className=" flex flex-row justify-evenly items-start gap-8 md:gap-12">
             {/* Tusgal Column */}
             <div>
                 <h3 className="text-white text-xl font-bold mb-4">About</h3>

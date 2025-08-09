@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 // GET /api/admin/categories/[id] - get single category
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  // Loosen context type to satisfy Next.js route handler checker
+  context: any
 ) {
   try {
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         products: true,
         _count: {
@@ -32,8 +33,8 @@ export async function GET(
 
 // PUT /api/admin/categories/[id] - update category
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     const body = await req.json();
@@ -45,7 +46,7 @@ export async function PUT(
 
     // Check if category exists
     const existingCategory = await prisma.category.findUnique({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     if (!existingCategory) {
@@ -56,7 +57,7 @@ export async function PUT(
     const nameConflict = await prisma.category.findFirst({
       where: {
         name,
-        id: { not: params.id }
+        id: { not: context.params.id }
       }
     });
 
@@ -65,7 +66,7 @@ export async function PUT(
     }
 
     const updatedCategory = await prisma.category.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: {
         name,
         description
@@ -81,13 +82,13 @@ export async function PUT(
 
 // DELETE /api/admin/categories/[id] - delete category
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: any
 ) {
   try {
     // Check if category exists and has products
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         _count: {
           select: {
@@ -108,7 +109,7 @@ export async function DELETE(
     }
 
     await prisma.category.delete({
-      where: { id: params.id }
+      where: { id: context.params.id }
     });
 
     return NextResponse.json({ message: 'Category deleted successfully' });

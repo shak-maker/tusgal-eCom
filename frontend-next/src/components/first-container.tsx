@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 
 function ContainerOne() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 mt-20 min-h-[600px] bg-[rgba(194,223,241,1)] p-5">
+    <div id="first" className="grid grid-cols-1 sm:grid-cols-2 mt-20 min-h-[600px] bg-[rgba(194,223,241,1)] p-5">
       {/* Text Content (unchanged) */}
       <div className="max-w-2xl w-full flex flex-col justify-center items-start gap-y-6 text-left font-mongolian p-4 md:p-8">
         <h3 className="text-[15px] w-full text-center md:text-left text-black">

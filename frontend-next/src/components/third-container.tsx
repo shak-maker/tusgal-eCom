@@ -4,7 +4,7 @@ function ContainerThree(){
     return (
     <>
     
-        <section>
+        <section id="third">
             <div className="grid grid-cols-1 bg-gray-50 py-10 text-center px-2 sm:px-4">
                 <h1 className="text-2xl sm:text-3xl font-medium mb-10">Тусгалаас худалдан авах тухай</h1>
                 <div className="flex flex-col sm:flex-row sm:justify-evenly sm:items-center gap-8">

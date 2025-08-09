@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 function Header() {
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
@@ -38,9 +39,21 @@ function Header() {
     }
   }
 
+  const smoothScroll = (e, id) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+    setIsMenuOpen(false); // Close mobile menu if open
+  };
+
   return (
     <>
-      <div className="fixed top-0 left-0 z-50 w-full h-[60px] md:h-[100px] lg:h-[80px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
+      <div id="home" className="fixed top-0 left-0 z-50 w-full h-[60px] md:h-[100px] lg:h-[80px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
         <Link href="/" className="w-[100px] md:w-[120px] lg:w-[120px] h-[30px] md:h-[40px] lg:h-[40px] flex items-center md:ml-2">
           <img src="/brandLogo.png" alt="Brand Logo" className="ml-5 md:ml-8" />
         </Link>
@@ -49,16 +62,20 @@ function Header() {
         <nav className="absolute right-20 hidden md:block w-[350px] md:w-[493px] lg:w-[493px] h-[30px] md:h-[25px] lg:h-[25px] ml-auto mr-10 sm:mr-5">
           <ul className="flex space-x-4 md:space-x-6 lg:space-x-6 justify-center items-center h-full">
             <li>
-              <a href="#home" className="text-[rgba(255,0,0,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Нүүр</a>
+              <a href="#home" onClick={(e) => smoothScroll(e, 'first')} className="text-[rgba(255,0,0,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">
+                Нүүр</a>
             </li>
             <li>
-              <Link href="/products" className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Шил авах</Link>
+              <a href="#about" onClick={(e) => smoothScroll(e, 'second')} className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">
+                Нүүрний хэлбэр олох</a>
             </li>
             <li>
-              <a href="#about" className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Нүүрний хэлбэр олох</a>
+              <a href="#products" onClick={(e) => smoothScroll(e, 'products')} className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">
+              Шил авах</a>
             </li>
             <li>
-              <a href="#about" className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">Зааварчилгаа</a>
+              <a href="#about" className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">
+                Зааварчилгаа</a>
             </li>
           </ul>
         </nav>

@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 
 function ContainerTwo() {
   return (
-    <section className="bg-gray-200 py-8 px-2 sm:px-4">
+    <section id="second" className="bg-gray-200 py-8 px-2 sm:px-4">
       <div className="w-full mx-auto sm:grid-cols-2 md:grid-cols-3 gap-6">
         <Card className="flex flex-col items-center bg-[rgba(237,237,237,1)] rounded-lg w-full h-full shadow-md p-4">
           <CardHeader className="flex flex-col items-center w-full">

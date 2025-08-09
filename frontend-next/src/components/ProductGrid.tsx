@@ -188,7 +188,7 @@ export default function ProductGrid({
 
   return (
     <>
-      <section className={`bg-gray-50 py-12 px-4 ${className}`}>
+      <section id="products" className={`bg-gray-50 py-12 px-4 ${className}`}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">

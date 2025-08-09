@@ -8,7 +8,7 @@ export default function AdminProductsPage() {
 
       {/* Centered content card */}
       <div className="z-10 max-w-xl w-full bg-white/30 backdrop-blur-lg rounded-2xl shadow-2xl p-10 border border-white/40">
-        <h1 className="text-3xl font-bold mb-6 text-white drop-shadow">Add New Glasses Product</h1>
+        <h1 className="text-3xl font-bold mb-6 text-white drop-shadow">Шинээр Категори нэмэх</h1>
         <ProductForm />
       </div>
     </main>

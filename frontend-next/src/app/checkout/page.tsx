@@ -97,13 +97,13 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-gray-50 pt-24">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center py-16">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">You need items in your cart to proceed to checkout.</p>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Таны сагс хоосон байна.</h2>
+            <p className="text-gray-600 mb-8">Та төлбөрөө хийхийн тулд сагсандаа шил сонгоно уу.</p>
             <Link 
               href="/" 
               className="inline-flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
-              Start Shopping
+              Дэлгүүр хэсэх
             </Link>
           </div>
         </div>
@@ -122,17 +122,17 @@ export default function CheckoutPage() {
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft size={20} />
-              <span>Back to Cart</span>
+              <span>Сасруу буцах</span>
             </Link>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Төлбөрөө төлөх</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
           <div>
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Захиалгийн хураангуй</h2>
               <div className="space-y-4">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex items-center space-x-4">
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
                     />
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{item.product.name}</h3>
-                      <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                      <p className="text-sm text-gray-600">Ширхэг: {item.quantity}</p>
                     </div>
                     <p className="font-semibold text-gray-900">
                       ₮ {(item.product.price * item.quantity).toLocaleString()}
@@ -157,19 +157,19 @@ export default function CheckoutPage() {
 
             {/* Order Total */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Total</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Захиалгийн дүн</h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Subtotal ({itemCount} items)</span>
+                  <span>Нийт дүн({itemCount} items)</span>
                   <span>₮ {total.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Shipping</span>
-                  <span>Free</span>
+                  <span>Хүргэлт</span>
+                  <span>Үнэгүй</span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-lg font-semibold text-gray-900">
-                    <span>Total</span>
+                    <span>Нийт</span>
                     <span>₮ {total.toLocaleString()}</span>
                   </div>
                 </div>
@@ -180,13 +180,13 @@ export default function CheckoutPage() {
           {/* Checkout Form */}
           <div>
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Shipping Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Хүргэлтийн мэдээлэл</h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
+                      Бүтэн нэр
                     </label>
                     <input
                       type="text"
@@ -200,7 +200,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
+                      Э-майл
                     </label>
                     <input
                       type="email"
@@ -216,7 +216,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number
+                    Утасны дугаар
                   </label>
                   <input
                     type="tel"
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                    Address
+                    Хаяг
                   </label>
                   <input
                     type="text"
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                      City
+                      Хот 
                     </label>
                     <input
                       type="text"
@@ -261,7 +261,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                      Postal Code
+                      ЗИП код
                     </label>
                     <input
                       type="text"
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
                   type="submit"
                   className="w-full bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors font-medium"
                 >
-                  Place Order
+                  Захиалга хийх
                 </button>
               </form>
             </div>
@@ -289,18 +289,18 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="flex flex-col items-center space-y-2">
                   <Shield size={24} className="text-green-600" />
-                  <span className="text-sm font-medium text-gray-900">Secure Payment</span>
-                  <span className="text-xs text-gray-600">Your data is protected</span>
+                  <span className="text-sm font-medium text-gray-900">Аюулгүй төлбөрийн систем</span>
+                  <span className="text-xs text-gray-600">Таны мэдээлэл хамгаалагдсан </span>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
                   <Truck size={24} className="text-blue-600" />
-                  <span className="text-sm font-medium text-gray-900">Free Shipping</span>
-                  <span className="text-xs text-gray-600">On orders over ₮50,000</span>
+                  <span className="text-sm font-medium text-gray-900">Үнэгүй хүргэлт</span>
+                  <span className="text-xs text-gray-600">100'000₮ өөс дээш худалдан авалтанд</span>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
                   <CreditCard size={24} className="text-purple-600" />
-                  <span className="text-sm font-medium text-gray-900">Multiple Payment</span>
-                  <span className="text-xs text-gray-600">Credit card, bank transfer</span>
+                  <span className="text-sm font-medium text-gray-900">QPay төлбөрийн систем</span>
+                  <span className="text-xs text-gray-600">Та QR код уншуулан төлбөрөө хийнэ үү</span>
                 </div>
               </div>
             </div>

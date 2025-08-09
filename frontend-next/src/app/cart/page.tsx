@@ -160,7 +160,7 @@ export default function CartPage() {
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="p-6 border-b border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Cart Items ({itemCount})
+                    Сагсан дахь шилнүүд ({itemCount})
                   </h2>
                 </div>
                 
@@ -183,20 +183,20 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Захиалгийн хураангуй</h2>
                 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal ({itemCount} items)</span>
+                    <span>Дүн ({itemCount} Ширхэг)</span>
                     <span>₮ {total.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Shipping</span>
-                    <span>Free</span>
+                    <span>Хүргэлт</span>
+                    <span>Үнэгүй</span>
                   </div>
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-lg font-semibold text-gray-900">
-                      <span>Total</span>
+                      <span>Нийт</span>
                       <span>₮ {total.toLocaleString()}</span>
                     </div>
                   </div>
@@ -206,7 +206,7 @@ export default function CartPage() {
                   href="/checkout"
                   className="w-full bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors text-center block font-medium"
                 >
-                  Proceed to Checkout
+                  Үргэлжүүлэн төлбөрөө хийх
                 </Link>
 
                 <div className="mt-4 text-center">
@@ -214,7 +214,7 @@ export default function CartPage() {
                     href="/" 
                     className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
-                    Continue Shopping
+                    Дахин шил нэмэх
                   </Link>
                 </div>
               </div>

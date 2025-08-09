@@ -53,7 +53,7 @@ interface Order {
   id: string;
   userId: string;
   total: number;
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: 'ХҮЛЭЭГДЭЖ БАЙНА' | 'БАТАЛГААЖСАН' | 'ХҮРГЭЛТ ГАРСАН' | 'ХҮЛЭЭЖ АВСАН' | 'ЦУЦЛАГДСАН';
   paid: boolean;
   shippingAddress?: string;
   phone?: string;
@@ -423,7 +423,7 @@ const GlassesAdminDashboard = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">Уншиж байна...</p>
         </div>
       </div>
     );
@@ -432,7 +432,7 @@ const GlassesAdminDashboard = () => {
   // Dashboard stats
   const totalProducts = products.length;
   const totalOrders = orders.length;
-  const pendingOrders = orders.filter(order => order.status === 'PENDING').length;
+  const pendingOrders = orders.filter(order => order.status === 'ХҮЛЭЭГДЭЖ БАЙНА').length;
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
 
   return (
@@ -441,15 +441,15 @@ const GlassesAdminDashboard = () => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">👓 Glasses Admin</h1>
+            <h1 className="text-2xl font-bold text-gray-900">👓 Тусгал Админ</h1>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Welcome, {user?.email}</span>
+              <span className="text-sm text-gray-500">Тавтай морил, {user?.email}</span>
               <button
                 onClick={handleLogout}
                 className="flex items-center px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                Гарах
               </button>
             </div>
           </div>
@@ -468,10 +468,10 @@ const GlassesAdminDashboard = () => {
         <div className="mb-8">
           <nav className="flex space-x-8">
             {([
-              { id: 'dashboard', name: 'Dashboard', icon: DollarSign },
-              { id: 'products', name: 'Products', icon: Package },
-              { id: 'categories', name: 'Categories', icon: Package },
-              { id: 'orders', name: 'Orders', icon: ShoppingCart }
+              { id: 'dashboard', name: 'Ерөнхий үзүүлэлт', icon: DollarSign },
+              { id: 'products', name: 'Бараанууд', icon: Package },
+              { id: 'categories', name: 'Категориуд', icon: Package },
+              { id: 'orders', name: 'Захиалгууд', icon: ShoppingCart }
             ] as { id: 'dashboard' | 'products' | 'categories' | 'orders'; name: string; icon: React.ElementType }[]).map(({ id, name, icon: Icon }) => (
               <button
                 key={id}
@@ -493,14 +493,14 @@ const GlassesAdminDashboard = () => {
         {loadingData && (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600">Loading data...</span>
+            <span className="ml-2 text-gray-600">Дата уншиж байна...</span>
           </div>
         )}
 
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && !loadingData && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Dashboard Overview</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Ерөнхий үзүүлэлт</h2>
             
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -508,7 +508,7 @@ const GlassesAdminDashboard = () => {
                 <div className="flex items-center">
                   <Package className="w-8 h-8 text-blue-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Total Products</p>
+                    <p className="text-sm font-medium text-gray-500">Нийт барааны тоо</p>
                     <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
                   </div>
                 </div>
@@ -518,7 +518,7 @@ const GlassesAdminDashboard = () => {
                 <div className="flex items-center">
                   <ShoppingCart className="w-8 h-8 text-green-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Total Orders</p>
+                    <p className="text-sm font-medium text-gray-500">Нийт Захиалга</p>
                     <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
                   </div>
                 </div>
@@ -528,7 +528,7 @@ const GlassesAdminDashboard = () => {
                 <div className="flex items-center">
                   <Users className="w-8 h-8 text-yellow-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Pending Orders</p>
+                    <p className="text-sm font-medium text-gray-500">Хүлээгдэж буй Захиалга</p>
                     <p className="text-2xl font-bold text-gray-900">{pendingOrders}</p>
                   </div>
                 </div>
@@ -538,8 +538,8 @@ const GlassesAdminDashboard = () => {
                 <div className="flex items-center">
                   <DollarSign className="w-8 h-8 text-purple-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</p>
+                    <p className="text-sm font-medium text-gray-500">Нийт орлого</p>
+                    <p className="text-2xl font-bold text-gray-900">₮{totalRevenue.toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -548,7 +548,7 @@ const GlassesAdminDashboard = () => {
             {/* Recent Orders */}
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b">
-                <h3 className="text-lg font-medium text-gray-900">Recent Orders</h3>
+                <h3 className="text-lg font-medium text-gray-900">Өмнөх Захиалгууд</h3>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
@@ -559,7 +559,7 @@ const GlassesAdminDashboard = () => {
                         <p className="text-sm text-gray-500">{order.user.name || order.user.email}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-gray-900">${order.total}</p>
+                        <p className="font-medium text-gray-900">₮{order.total}</p>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
                           {order.status}
                         </span>
@@ -576,7 +576,7 @@ const GlassesAdminDashboard = () => {
         {activeTab === 'products' && !loadingData && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Products Management</h2>
+              <h2 className="text-xl font-semibold text-gray-900">барааны менежмэнт</h2>
               <button
                 onClick={() => {
                   setEditingProduct(null);
@@ -585,7 +585,7 @@ const GlassesAdminDashboard = () => {
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Product
+                Бараа нэмэх
               </button>
             </div>
 
@@ -594,46 +594,46 @@ const GlassesAdminDashboard = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg p-6 w-full max-w-md">
                   <h3 className="text-lg font-medium mb-4">
-                    {editingProduct ? 'Edit Product' : 'Add New Product'}
+                    {editingProduct ? 'Барааны мэдээлэл өөрчлөх' : 'Шинэ бараа нэмэх'}
                   </h3>
                   <div className="space-y-4">
                     <input
                       type="text"
-                      placeholder="Product Name *"
+                      placeholder="Барааны нэр *"
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
                       className="w-full p-2 border rounded-lg"
                     />
                     <textarea
-                      placeholder="Description"
+                      placeholder="Тайлбар"
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
                       className="w-full p-2 border rounded-lg h-20"
                     />
                     <input
                       type="number"
-                      placeholder="Price *"
+                      placeholder="Үнийн дүн *"
                       value={newProduct.price}
                       onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
                       className="w-full p-2 border rounded-lg"
                     />
                     <input
                       type="url"
-                      placeholder="Image URL *"
+                      placeholder="Зурагны URL *"
                       value={newProduct.imageUrl}
                       onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
                       className="w-full p-2 border rounded-lg"
                     />
                     <input
                       type="number"
-                      placeholder="Stock Quantity"
+                      placeholder="Нийт ширхэг"
                       value={newProduct.stock}
                       onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
                       className="w-full p-2 border rounded-lg"
                     />
                     <input
                       type="text"
-                      placeholder="Face Shape"
+                      placeholder="Нүүрний хэлбэр"
                       value={newProduct.faceShape}
                       onChange={(e) => setNewProduct({...newProduct, faceShape: e.target.value})}
                       className="w-full p-2 border rounded-lg"
@@ -643,7 +643,7 @@ const GlassesAdminDashboard = () => {
                       onChange={(e) => setNewProduct({...newProduct, categoryId: e.target.value})}
                       className="w-full p-2 border rounded-lg"
                     >
-                      <option value="">Select Category *</option>
+                      <option value="">Категори сонгох *</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
                           {category.name}
@@ -668,13 +668,13 @@ const GlassesAdminDashboard = () => {
                       }}
                       className="px-4 py-2 text-gray-600 hover:text-gray-800"
                     >
-                      Cancel
+                      Цуцлах
                     </button>
                     <button
                       onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
-                      {editingProduct ? 'Update' : 'Add'} Product
+                      {editingProduct ? 'Update' : 'Add'} Бараа
                     </button>
                   </div>
                 </div>
@@ -697,7 +697,7 @@ const GlassesAdminDashboard = () => {
                     <p className="text-sm text-gray-500">{product.category?.name || 'No Category'}</p>
                     <p className="text-sm text-gray-500">{product.faceShape || 'Universal'}</p>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-lg font-bold text-gray-900">${product.price}</span>
+                      <span className="text-lg font-bold text-gray-900">₮{product.price}</span>
                       <span className="text-sm text-gray-500">Stock: {product.stock}</span>
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
@@ -737,7 +737,7 @@ const GlassesAdminDashboard = () => {
         {activeTab === 'categories' && !loadingData && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Categories Management</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Категори менежмэнт</h2>
               <button
                 onClick={() => {
                   setEditingCategory(null);
@@ -746,7 +746,7 @@ const GlassesAdminDashboard = () => {
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Category
+                Категори нэмэх
               </button>
             </div>
 
@@ -755,18 +755,18 @@ const GlassesAdminDashboard = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg p-6 w-full max-w-md">
                   <h3 className="text-lg font-medium mb-4">
-                    {editingCategory ? 'Edit Category' : 'Add New Category'}
+                    {editingCategory ? 'Категори өөрчлөх' : 'Шинэ категори нэмэх'}
                   </h3>
                   <div className="space-y-4">
                     <input
                       type="text"
-                      placeholder="Category Name *"
+                      placeholder="Категорын нэр *"
                       value={newCategory.name}
                       onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
                       className="w-full p-2 border rounded-lg"
                     />
                     <textarea
-                      placeholder="Description"
+                      placeholder="Тайлбар"
                       value={newCategory.description}
                       onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
                       className="w-full p-2 border rounded-lg h-20"
@@ -781,15 +781,15 @@ const GlassesAdminDashboard = () => {
                       }}
                       className="px-4 py-2 text-gray-600 hover:text-gray-800"
                     >
-                      Cancel
+                      Цуцлах
                     </button>
                     <button
                       onClick={editingCategory ? handleUpdateCategory : handleAddCategory}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
-                      {editingCategory ? 'Update' : 'Add'} Category
+                      {editingCategory ? 'Update' : 'Нэмэх'} 
                     </button>
-                  </div>
+                  </div>  
                 </div>
               </div>
             )}
@@ -799,10 +799,10 @@ const GlassesAdminDashboard = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Нэр</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тайлбар</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Бараанууд</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">өөрчлөх</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -872,12 +872,12 @@ const GlassesAdminDashboard = () => {
                       {selectedOrder.items.map((item, index) => (
                         <div key={index} className="flex justify-between py-2 border-b">
                           <span>{item.product.name} x{item.quantity}</span>
-                          <span>${item.price}</span>
+                          <span>₮{item.price}</span>
                         </div>
                       ))}
                       <div className="flex justify-between font-bold text-lg mt-2">
                         <span>Total:</span>
-                        <span>${selectedOrder.total}</span>
+                        <span>₮{selectedOrder.total}</span>
                       </div>
                     </div>
                   </div>
@@ -898,12 +898,12 @@ const GlassesAdminDashboard = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Захиалгийн ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Захиалагч</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Нийт</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Он ёар өдөр</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">өөрчлөх</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -916,7 +916,7 @@ const GlassesAdminDashboard = () => {
                           <div className="text-sm text-gray-500">{order.user.email}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${order.total}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₮{order.total}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
                           value={order.status}

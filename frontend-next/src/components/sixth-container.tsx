@@ -128,7 +128,7 @@ function ContainerSix(){
               <Card key={testimonial.id} className="p-6 w-full mt-5 max-h-auto">
                 <div className="flex flex-row gap-4">
                   <div>
-                    <img src={testimonial.image} 
+                    <img src={testimonial.image} alt={`${testimonial.author} avatar`} 
                     className="w-10 h-10 rounded-full object-cover" />
                   </div>
                   <div>
@@ -137,7 +137,7 @@ function ContainerSix(){
                   </div>
                 </div>
                 <p className="text-gray-700 italic mb-4">
-                  "{testimonial.text}"
+                  &quot;{testimonial.text}&quot;
                 </p>
                 <div className="flex items-center gap-1 mb-4">
                   {renderStars(testimonial.rating)}

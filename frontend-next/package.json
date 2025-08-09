@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:push": "npx prisma db push",
-    "db:generate": "npx prisma generate"
+    "db:generate": "npx prisma generate",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",

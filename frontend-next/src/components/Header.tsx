@@ -41,7 +41,7 @@ function Header() {
   return (
     <>
       <div className="fixed top-0 left-0 z-50 w-full h-[60px] md:h-[100px] lg:h-[80px] flex flex-row items-center justify-between bg-[rgba(255,255,255,1)] p-4">
-        <Link href="/" className="w-[100px] md:w-[120px] lg:w-[120px] h-[30px] md:h-[40px] lg:h-[40px] flex items-center md:ml-5">
+        <Link href="/" className="w-[100px] md:w-[120px] lg:w-[120px] h-[30px] md:h-[40px] lg:h-[40px] flex items-center md:ml-2">
           <img src="/brandLogo.png" alt="Brand Logo" className="ml-5 md:ml-8" />
         </Link>
 

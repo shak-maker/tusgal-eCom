@@ -55,9 +55,9 @@ export async function POST(req: Request) {
       longitude,
     } = body;
 
-    const userId = await getOrCreateTempUserId();
+    const tempUserId = await getOrCreateTempUserId();
 
-    if (!userId || !items || !shippingAddress || !phone || !email) {
+    if (!tempUserId || !items || !shippingAddress || !phone || !email) {
       return NextResponse.json({ 
         error: 'User ID, items, shipping address, phone, and email are required' 
       }, { status: 400 });
@@ -98,10 +98,24 @@ export async function POST(req: Request) {
 
     // Create order with transaction
     const order = await prisma.$transaction(async (tx) => {
+      // Ensure we have a User associated by email
+      const user = await tx.user.upsert({
+        where: { email },
+        update: {
+          phone: phone ?? undefined,
+          address: shippingAddress ?? undefined,
+        },
+        create: {
+          email,
+          phone: phone ?? undefined,
+          address: shippingAddress ?? undefined,
+        },
+      })
+
       // Create the order
       const newOrder = await tx.order.create({
         data: {
-          userId,
+          userId: user.id,
           total,
           shippingAddress,
           phone,
@@ -135,7 +149,7 @@ export async function POST(req: Request) {
 
       // Clear user's cart
       await tx.cartItem.deleteMany({
-        where: { userId }
+        where: { userId: tempUserId }
       });
 
       return newOrder;

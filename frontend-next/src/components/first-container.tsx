@@ -19,7 +19,7 @@ function ContainerOne() {
         </p>
         <div className="w-full flex justify-center md:justify-start">
           <Button
-            className="bg-[#60b4f2] mb-5 sm:mb-0 text-white rounded-xl px-10 py-6 shadow-[0_0_25px_#60b4f2] text-xs font-semibold hover:bg-[#4ea3e0] transition"
+            className="bg-[#60b4f2] cursor-pointer mb-5 sm:mb-0 text-white rounded-xl px-10 py-6 shadow-[0_0_25px_#60b4f2] text-xs font-semibold hover:bg-[#4ea3e0] transition"
           >
             ХЭМЖИХ <br /> ЗААВАРЧИЛГАА
           </Button>

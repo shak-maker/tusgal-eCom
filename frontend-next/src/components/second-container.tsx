@@ -13,23 +13,31 @@ function ContainerTwo() {
             </CardTitle>
           </CardHeader>
           <CardContent className="mt-4 flex flex-col sm:flex-row gap-4 w-full">
+            <input 
+              type="number"
+              placeholder="PD(Нүдний зай) см"
+              className="w-full sm:w-[30%] cursor-pointer flex-1 h-12 border-2 p-3 rounded-2xl bg-white border-[rgba(94,172,221,1)] text-gray-500 hover:bg-blue-50 hover:text-black text-base font-medium px-5"
+            />
+            <select
+              className="w-full sm:w-auto flex-1 h-12 text-black0 border-2 p-3 rounded-2xl text-gray-500 bg-white border-[rgba(94,172,221,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium px-4"
+            >
+              <option value="" disabled selected>Нүүрний ерөнхий</option>
+              <option value="derveljakin"
+              className="text-black">Дөрвөлжин</option>
+              <option value="dugui"
+              className="text-black">Дугуй</option>
+              <option value="narny"
+              className="text-black">Нарны</option>
+              <option value="haraany"
+              className="text-black">Харааны</option>
+              <option value="huuhain"
+              className="text-black">Хүүхдийн</option>
+            </select>
             <Button 
               variant="outline"
-              className="w-full sm:w-auto flex-1 h-12 border-2 border-[rgba(94,172,221,1)] text-[rgba(117,117,117,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium"
+              className="w-full sm:w-auto cursor-pointer flex-1 h-12 border-2 border-[rgba(94,172,221,1)]  hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium"
             >
-              PD(Нүдний зай)
-            </Button>
-            <Button 
-              variant="outline"
-              className="w-full sm:w-auto flex-1 h-12 border-2 border-[rgba(94,172,221,1)] text-[rgba(117,117,117,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium"
-            >
-              Нүүрний ерөнхий
-            </Button>
-            <Button 
-              variant="outline"
-              className="w-full sm:w-auto flex-1 h-12 border-2 border-[rgba(94,172,221,1)] text-[rgba(117,117,117,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium"
-            >
-              Шил олох
+              Шил хайх
             </Button>
           </CardContent>
         </Card>

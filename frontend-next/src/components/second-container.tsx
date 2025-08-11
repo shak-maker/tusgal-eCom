@@ -35,7 +35,7 @@ function ContainerTwo() {
             </select>
             <Button 
               variant="outline"
-              className="w-full sm:w-auto cursor-pointer flex-1 h-12 border-2 border-[rgba(94,172,221,1)]  hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium"
+              className="w-full sm:w-auto cursor-pointer flex-1 h-12 border-2 rounded-2xl border-[rgba(94,172,221,1)]  hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium"
             >
               Шил хайх
             </Button>

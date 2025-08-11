@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { X, Camera, RotateCcw, Download } from 'lucide-react'
+import { X, Camera, RotateCcw, Download, Upload } from 'lucide-react'
 
 type TryOnModalProps = {
   isOpen: boolean
@@ -18,16 +18,63 @@ type TryOnModalProps = {
 export default function TryOnModal({ isOpen, onClose, product }: TryOnModalProps) {
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [isCapturing, setIsCapturing] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!isOpen || !product) return null
 
-  const handleCapture = () => {
+  // Start camera stream
+  const startCamera = async () => {
     setIsCapturing(true)
-    // Simulate camera capture
-    setTimeout(() => {
-      setCapturedImage('/womanBackground.png') // Using existing image as placeholder
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' } // Front camera
+      })
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+    } catch (err) {
+      console.error('Camera error:', err)
       setIsCapturing(false)
-    }, 1000)
+    }
+  }
+
+  // Capture image from camera
+  const captureImage = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas')
+      canvas.width = videoRef.current.videoWidth
+      canvas.height = videoRef.current.videoHeight
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0)
+        setCapturedImage(canvas.toDataURL('image/png'))
+        stopCamera()
+      }
+    }
+  }
+
+  // Stop camera stream
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach(track => track.stop())
+      setIsCapturing(false)
+    }
+  }
+
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCapturedImage(event.target.result as string)
+        }
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   const handleReset = () => {
@@ -80,22 +127,54 @@ export default function TryOnModal({ isOpen, onClose, product }: TryOnModalProps
             </div>
 
             {/* Try On Area */}
-            <div>
+              <div>
               <h3 className="text-lg font-semibold mb-4">Зүүж үзэх</h3>
               
               {!capturedImage ? (
                 <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                  <div className="text-center">
-                    <Camera size={48} className="mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-600 mb-4">Зураг авахын тулд дээрх товчийг дарна уу</p>
-                    <button
-                      onClick={handleCapture}
-                      disabled={isCapturing}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    >
-                      {isCapturing ? 'Зураг авч байна...' : 'Зураг авах'}
-                    </button>
-                  </div>
+                  {isCapturing ? (
+                    <div className="w-full h-full relative">
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={captureImage}
+                        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-3 rounded-full hover:bg-red-600"
+                      >
+                        <Camera size={24} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Camera size={48} className="mx-auto mb-4 text-gray-400" />
+                      <p className="text-gray-600 mb-4">Зураг авах эсвэл байршуулах</p>
+                      <div className="flex gap-4 justify-center">
+                        <button
+                          onClick={startCamera}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        >
+                          Камер нээх
+                        </button>
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                        >
+                          <Upload size={20} className="inline mr-2" />
+                          Зураг сонгох
+                        </button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileUpload}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
@@ -108,13 +187,13 @@ export default function TryOnModal({ isOpen, onClose, product }: TryOnModalProps
                   <div className="absolute top-2 right-2 flex space-x-2">
                     <button
                       onClick={handleReset}
-                      className="p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                      className="p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white"
                     >
                       <RotateCcw size={20} />
                     </button>
                     <button
                       onClick={handleDownload}
-                      className="p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+                      className="p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white"
                     >
                       <Download size={20} />
                     </button>

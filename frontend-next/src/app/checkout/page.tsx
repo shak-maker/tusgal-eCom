@@ -495,7 +495,7 @@ export default function CheckoutPage() {
                 <div className="flex flex-col items-center space-y-2">
                   <Truck size={24} className="text-blue-600" />
                   <span className="text-sm font-medium text-gray-900">Үнэгүй хүргэлт</span>
-                  <span className="text-xs text-gray-600">100'000₮ өөс дээш худалдан авалтанд</span>
+                  <span className="text-xs text-gray-600">100&apos;000₮ өөс дээш худалдан авалтанд</span>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
                   <CreditCard size={24} className="text-purple-600" />

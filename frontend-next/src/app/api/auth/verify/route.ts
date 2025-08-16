@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
+import { config } from '@/lib/config';
 
 export async function POST(request: Request) {
   try {
     const { password } = await request.json();
     
     // Get admin password from environment variable
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminPassword = config.admin.password;
     
     if (!adminPassword) {
       return NextResponse.json({ 

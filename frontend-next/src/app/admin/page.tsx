@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Eye, Package, ShoppingCart, Users, DollarSign, LogOut, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -70,7 +70,7 @@ interface Order {
 
 const GlassesAdminDashboard = () => {
   const router = useRouter();
-  const { user, loading, isAdmin, signOut } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'categories'>('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -125,14 +125,7 @@ const GlassesAdminDashboard = () => {
     }
   }, [user, loading, isAdmin, router]);
 
-  // Fetch data based on active tab
-  useEffect(() => {
-    if (user && isAdmin) {
-      fetchData();
-    }
-  }, [user, isAdmin, activeTab]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoadingData(true);
     setError(null);
     
@@ -165,7 +158,14 @@ const GlassesAdminDashboard = () => {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [activeTab]);
+
+  // Fetch data based on active tab
+  useEffect(() => {
+    if (user && isAdmin) {
+      fetchData();
+    }
+  }, [user, isAdmin, fetchData]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin-auth');
@@ -866,11 +866,11 @@ const GlassesAdminDashboard = () => {
                       {selectedOrder.phone && (
                         <p><strong>Phone:</strong> {selectedOrder.phone}</p>
                       )}
-                      {'latitude' in selectedOrder && (selectedOrder as any).latitude != null && (
-                        <p><strong>Latitude:</strong> {String((selectedOrder as any).latitude)}</p>
+                      {'latitude' in selectedOrder && selectedOrder.latitude != null && (
+                        <p><strong>Latitude:</strong> {String(selectedOrder.latitude)}</p>
                       )}
-                      {'longitude' in selectedOrder && (selectedOrder as any).longitude != null && (
-                        <p><strong>Longitude:</strong> {String((selectedOrder as any).longitude)}</p>
+                      {'longitude' in selectedOrder && selectedOrder.longitude != null && (
+                        <p><strong>Longitude:</strong> {String(selectedOrder.longitude)}</p>
                       )}
                     </div>
                     <div>

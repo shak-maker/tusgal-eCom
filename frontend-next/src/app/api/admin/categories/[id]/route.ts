@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { ApiContext } from '@/lib/types';
 
 // GET /api/admin/categories/[id] - get single category
 export async function GET(
   req: NextRequest,
-  // Loosen context type to satisfy Next.js route handler checker
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const category = await prisma.category.findUnique({
-      where: { id: context.params.id },
+      where: { id },
       include: {
         products: true,
         _count: {
@@ -34,9 +35,10 @@ export async function GET(
 // PUT /api/admin/categories/[id] - update category
 export async function PUT(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const body = await req.json();
     const { name, description } = body;
 
@@ -46,7 +48,7 @@ export async function PUT(
 
     // Check if category exists
     const existingCategory = await prisma.category.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     if (!existingCategory) {
@@ -57,7 +59,7 @@ export async function PUT(
     const nameConflict = await prisma.category.findFirst({
       where: {
         name,
-        id: { not: context.params.id }
+        id: { not: id }
       }
     });
 
@@ -66,7 +68,7 @@ export async function PUT(
     }
 
     const updatedCategory = await prisma.category.update({
-      where: { id: context.params.id },
+      where: { id },
       data: {
         name,
         description
@@ -83,12 +85,13 @@ export async function PUT(
 // DELETE /api/admin/categories/[id] - delete category
 export async function DELETE(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     // Check if category exists and has products
     const category = await prisma.category.findUnique({
-      where: { id: context.params.id },
+      where: { id },
       include: {
         _count: {
           select: {
@@ -109,7 +112,7 @@ export async function DELETE(
     }
 
     await prisma.category.delete({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Category deleted successfully' });

@@ -1,13 +1,14 @@
 import { Resend } from 'resend'
+import { config } from './config'
 
 let resendClient: Resend | null = null
 
 function getResendClient(): Resend | null {
-  const apiKey = process.env.RESEND_API_KEY
+  const apiKey = config.email.resendKey
   if (!apiKey) return null
   if (!resendClient) resendClient = new Resend(apiKey)
   return resendClient
-}
+ }
 
 type OrderEmailParams = {
   to: string | string[]
@@ -16,14 +17,14 @@ type OrderEmailParams = {
 }
 
 export async function sendEmail({ to, subject, html }: OrderEmailParams) {
-  if (!process.env.RESEND_API_KEY || !process.env.FROM_EMAIL) {
+  if (!config.email.resendKey || !config.email.fromEmail) {
     console.warn('Email not sent: RESEND_API_KEY or FROM_EMAIL is missing')
     return
   }
   const client = getResendClient()
   if (!client) return
   await client.emails.send({
-    from: process.env.FROM_EMAIL as string,
+    from: config.email.fromEmail,
     to,
     subject,
     html,

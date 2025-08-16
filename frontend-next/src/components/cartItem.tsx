@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { Trash2, Plus, Minus } from 'lucide-react';
 
 type CartItemProps = {
-  id: string;
   product: {
     id: string;
     name: string;
@@ -17,7 +16,6 @@ type CartItemProps = {
 };
 
 export default function CartItem({
-  id,
   product,
   quantity,
   onUpdateQuantity,

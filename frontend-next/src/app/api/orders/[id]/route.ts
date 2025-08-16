@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { ApiContext } from "@/lib/types";
 
 // GET - Get order by ID
 export async function GET(
   request: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const order = await prisma.order.findUnique({
-      where: { id: context.params.id },
+      where: { id },
       include: {
         user: true,
         items: {
@@ -37,9 +39,10 @@ export async function GET(
 // PUT - Update order status
 export async function PUT(
   request: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const body = await request.json();
     const { status, paid } = body;
 
@@ -49,7 +52,7 @@ export async function PUT(
     if (paid !== undefined) updateData.paid = paid;
 
     const order = await prisma.order.update({
-      where: { id: context.params.id },
+      where: { id },
       data: updateData,
       include: {
         user: true,

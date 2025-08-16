@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Heart, ShoppingCart, Eye } from "lucide-react";
 import TryOnModal from "./TryOnModal";
@@ -53,12 +53,7 @@ export default function ProductGrid({
     product: null,
   });
 
-  useEffect(() => {
-    fetchCategories();
-    fetchProducts();
-  }, []);
-
-  async function fetchCategories() {
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch("/api/categories");
       if (res.ok) {
@@ -68,9 +63,9 @@ export default function ProductGrid({
     } catch (err) {
       console.error("Failed to fetch categories:", err);
     }
-  }
+  }, []);
 
-  async function fetchProducts() {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const url =
@@ -87,11 +82,16 @@ export default function ProductGrid({
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, [fetchCategories, fetchProducts]);
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory]);
+  }, [fetchProducts]);
 
   async function addToCart(productId: string) {
     try {

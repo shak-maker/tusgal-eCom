@@ -168,7 +168,6 @@ export default function CartPage() {
                   {cartItems.map((item) => (
                     <CartItem
                       key={item.id}
-                      id={item.id}
                       product={item.product}
                       quantity={item.quantity}
                       onUpdateQuantity={updateQuantity}

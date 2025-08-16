@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getOrCreateTempUserId } from '@/lib/cookies';
 import { buildOrderEmailHtml, sendEmail } from '@/lib/email';
+import { config } from '@/lib/config';
 
 // GET - Get user's orders
 export async function GET(request: Request) {
@@ -174,7 +175,7 @@ export async function POST(req: Request) {
 
     // Send confirmation emails (best-effort; do not block response on error)
     try {
-      const adminEmail = process.env.ADMIN_EMAIL
+      const adminEmail = config.admin.email
       if (orderWithItems) {
         const html = buildOrderEmailHtml({
           orderId: orderWithItems.id,

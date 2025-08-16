@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { ApiContext } from '@/lib/types';
 
 // GET /api/admin/orders/[id] - get single order
 export async function GET(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const order = await prisma.order.findUnique({
-      where: { id: context.params.id },
+      where: { id },
       include: {
         user: true,
         items: {
@@ -37,15 +39,16 @@ export async function GET(
 // PUT /api/admin/orders/[id] - update order status
 export async function PUT(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const body = await req.json();
     const { status, paid, shippingAddress, phone, email } = body;
 
     // Check if order exists
     const existingOrder = await prisma.order.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     if (!existingOrder) {
@@ -62,7 +65,7 @@ export async function PUT(
     if (email) updateData.email = email;
 
     const updatedOrder = await prisma.order.update({
-      where: { id: context.params.id },
+      where: { id },
       data: updateData,
       include: {
         user: true,
@@ -88,12 +91,13 @@ export async function PUT(
 // DELETE /api/admin/orders/[id] - delete order
 export async function DELETE(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     // Check if order exists
     const order = await prisma.order.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     if (!order) {
@@ -102,7 +106,7 @@ export async function DELETE(
 
     // Delete order (this will cascade delete order items)
     await prisma.order.delete({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Order deleted successfully' });

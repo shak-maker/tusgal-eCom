@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { ApiContext } from '@/lib/types';
 
 // GET /api/admin/products/[id] - get single product
 export async function GET(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const product = await prisma.product.findUnique({
-      where: { id: context.params.id },
+      where: { id },
       include: {
         category: true
       }
@@ -28,9 +30,10 @@ export async function GET(
 // PUT /api/admin/products/[id] - update product
 export async function PUT(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     const body = await req.json();
     const { name, description, price, imageUrl, stock, faceShape, categoryId } = body;
 
@@ -40,7 +43,7 @@ export async function PUT(
 
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     if (!existingProduct) {
@@ -48,7 +51,7 @@ export async function PUT(
     }
 
     const updatedProduct = await prisma.product.update({
-      where: { id: context.params.id },
+      where: { id },
       data: {
         name,
         description,
@@ -73,12 +76,13 @@ export async function PUT(
 // DELETE /api/admin/products/[id] - delete product
 export async function DELETE(
   req: NextRequest,
-  context: any
+  context: ApiContext
 ) {
   try {
+    const { id } = await context.params;
     // Check if product exists
     const product = await prisma.product.findUnique({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     if (!product) {
@@ -86,7 +90,7 @@ export async function DELETE(
     }
 
     await prisma.product.delete({
-      where: { id: context.params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Product deleted successfully' });

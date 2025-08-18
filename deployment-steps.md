@@ -189,7 +189,7 @@ RESEND_API_KEY=your_resend_api_key
 
 # Next.js Configuration
 NEXTAUTH_SECRET=your_generated_secret
-NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_URL=http://157.230.252.228
 
 # Application Configuration
 NODE_ENV=production
@@ -251,7 +251,7 @@ pm2 startup
 sudo tee /etc/nginx/sites-available/tusgal-app << 'EOF'
 server {
     listen 80;
-    server_name your-domain.com www.your-domain.com 157.230.252.228;
+    server_name 157.230.252.228;
 
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;

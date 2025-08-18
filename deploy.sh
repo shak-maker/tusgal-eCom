@@ -6,7 +6,8 @@ set -e
 # Configuration - Update these values for your deployment
 APP_NAME="tusgal-app"
 APP_DIR="/var/www/tusgal-app"
-DOMAIN_NAME="your-domain.com"  # Replace with your actual domain
+SERVER_IP="157.230.252.228"  # Your server IP address
+DOMAIN_NAME="157.230.252.228"  # Using IP address instead of domain
 DB_NAME="tusgal_db"
 DB_USER="tusgal_user"
 DB_PASSWORD="your_secure_password"  # Replace with a strong password
@@ -149,7 +150,7 @@ RESEND_API_KEY=your_resend_api_key
 
 # Next.js Configuration
 NEXTAUTH_SECRET=$(openssl rand -base64 32)
-NEXTAUTH_URL=https://$DOMAIN_NAME
+NEXTAUTH_URL=http://$DOMAIN_NAME
 
 # Application Configuration
 NODE_ENV=production
@@ -252,7 +253,7 @@ setup_nginx() {
     sudo tee /etc/nginx/sites-available/$APP_NAME << EOF
 server {
     listen 80;
-    server_name $DOMAIN_NAME www.$DOMAIN_NAME;
+    server_name $DOMAIN_NAME;
 
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -340,13 +341,14 @@ main() {
     echo ""
     print_status "Deployment completed successfully!"
     print_status "Your application should be running at: http://$DOMAIN_NAME"
+print_status "Access your application at: http://157.230.252.228"
     echo ""
     print_warning "Important next steps:"
     print_warning "1. Update the .env file with your actual credentials"
-    print_warning "2. Replace '$DOMAIN_NAME' with your actual domain"
-    print_warning "3. Set up SSL certificate with Let's Encrypt"
-    print_warning "4. Configure your domain DNS to point to this server"
-    print_warning "5. Test your application thoroughly"
+print_warning "2. Your application is accessible at: http://157.230.252.228"
+print_warning "3. When you get a domain, update DOMAIN_NAME and set up SSL"
+print_warning "4. Test your application thoroughly"
+print_warning "5. Consider setting up monitoring and backups"
     echo ""
     print_status "Useful commands:"
     print_status "- Check app status: pm2 status"

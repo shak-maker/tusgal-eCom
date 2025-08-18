@@ -25,7 +25,8 @@ This directory contains all the scripts and configuration files needed to deploy
 ### Prerequisites
 - A fresh Ubuntu 20.04+ server
 - SSH access to your server
-- Domain name (optional but recommended)
+- Domain name (optional but recommended for SSL)
+- **Note**: The scripts are configured to work with IP address (157.230.252.228) if you don't have a domain
 
 ### Step 1: Initial Server Setup
 ```bash
@@ -168,6 +169,25 @@ Edit the script to customize:
 
 ## 🔧 Configuration
 
+### IP Address Deployment (No Domain Required)
+
+The deployment scripts are configured to work with your server IP address (157.230.252.228) instead of a domain name. This means:
+
+- ✅ **No domain required** - Your app will be accessible at `http://157.230.252.228`
+- ✅ **HTTP instead of HTTPS** - No SSL certificate needed initially
+- ✅ **Ready to deploy immediately** - No DNS configuration required
+
+**To access your application after deployment:**
+```
+http://157.230.252.228
+```
+
+**When you get a domain later:**
+1. Update `DOMAIN_NAME` in `deploy.sh` to your domain
+2. Update `NEXTAUTH_URL` in `.env` to `https://your-domain.com`
+3. Set up SSL certificate with Let's Encrypt
+4. Update DNS records to point to your server IP
+
 ### Environment Variables
 
 1. Copy the template:
@@ -189,7 +209,7 @@ RESEND_API_KEY=your_resend_key
 
 # Next.js
 NEXTAUTH_SECRET=your_generated_secret
-NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_URL=http://157.230.252.228
 ```
 
 ### Server Configuration
@@ -205,7 +225,8 @@ APP_DIR="/var/www/tusgal-app"
 
 **In `deploy.sh`**:
 ```bash
-DOMAIN_NAME="your-domain.com"
+SERVER_IP="157.230.252.228"
+DOMAIN_NAME="157.230.252.228"
 DB_PASSWORD="your_secure_password"
 ```
 

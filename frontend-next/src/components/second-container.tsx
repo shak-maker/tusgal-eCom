@@ -27,7 +27,7 @@ function ContainerTwo() {
               onChange={(e) => setFaceShape(e.target.value)}
               className="w-full sm:w-auto flex-1 h-12 text-black0 border-2 p-3 rounded-2xl text-gray-500 bg-white border-[rgba(94,172,221,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium px-4"
             >
-              <option value="" disabled selected>Ерөнхий хэлбэр</option>
+              <option value="" disabled>Ерөнхий хэлбэр</option>
               <option value="derveljakin"
               className="text-black">Дөрвөлжин</option>
               <option value="dugui"

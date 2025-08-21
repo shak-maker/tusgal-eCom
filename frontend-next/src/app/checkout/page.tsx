@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { QPayPayment } from '@/components/QPayPayment'
 
 const MapPicker = dynamic(() => import('./MapPicker'), { ssr: false })
 
@@ -45,6 +46,8 @@ export default function CheckoutPage() {
     'yandex.com'
   ]
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [orderData, setOrderData] = useState<any>(null)
 
   useEffect(() => {
     async function fetchCart() {
@@ -119,20 +122,12 @@ export default function CheckoutPage() {
         email: formData.email,
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
         longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
+        totalAmount: cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
       }
 
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err?.error || 'Order creation failed')
-      }
-
-      alert('Захиалга амжилттай!')
+      // Store order data and show payment
+      setOrderData(payload)
+      setShowPayment(true)
     } catch (err) {
       console.error(err)
       alert('Алдаа гарлаа. Дахин оролдоно уу.')
@@ -472,17 +467,98 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={!isPhoneValid}
-                  className={`w-full py-3 px-6 rounded-lg transition-colors font-medium ${
-                    isPhoneValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  Захиалга хийх
-                </button>
-              </form>
-            </div>
+                {!showPayment ? (
+                  <button
+                    type="submit"
+                    disabled={!isPhoneValid}
+                    className={`w-full py-3 px-6 rounded-lg transition-colors font-medium ${
+                      isPhoneValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Захиалга хийх
+                  </button>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-blue-800 text-sm">
+                        Захиалгийн мэдээлэл бэлэн боллоо. Төлбөрөө төлөх хэсэгт орно уу.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPayment(false)}
+                      className="w-full py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    >
+                      Захиалгийн мэдээлэл засах
+                    </button>
+                  </div>
+                )}
+                              </form>
+              </div>
+
+              {/* QPay Payment Section */}
+              {showPayment && orderData && (
+                <div className="mt-6">
+                  <QPayPayment
+                    cartItems={cartItems}
+                    customerData={formData}
+                    onPaymentSuccess={async (paymentData) => {
+                      console.log('Payment successful:', paymentData)
+                      
+                      try {
+                        // Create the actual order in the database
+                        const orderPayload = {
+                          items: orderData.items,
+                          shippingAddress: orderData.shippingAddress,
+                          phone: orderData.phone,
+                          email: orderData.email,
+                          latitude: orderData.latitude,
+                          longitude: orderData.longitude,
+                          totalAmount: orderData.totalAmount,
+                          paymentId: paymentData.paymentId,
+                          invoiceId: paymentData.invoiceId,
+                          status: 'PAID'
+                        };
+
+                        console.log('Sending order payload:', orderPayload);
+
+                        const orderResponse = await fetch('/api/qpay/create-order', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(orderPayload),
+                        });
+
+                        if (orderResponse.ok) {
+                          const orderResult = await orderResponse.json();
+                          console.log('Order created:', orderResult);
+                          
+                          if (orderResult.success) {
+                            // Redirect to success page or show success message
+                            alert('Төлбөр амжилттай! Таны захиалга баталгаажлаа.');
+                            
+                            // Optionally redirect to success page
+                            // window.location.href = '/order-success';
+                          } else {
+                            console.error('Order creation failed:', orderResult.error);
+                            alert('Төлбөр амжилттай боловч захиалга үүсгэхэд алдаа гарлаа.');
+                          }
+                        } else {
+                          const errorData = await orderResponse.json();
+                          console.error('Failed to create order:', errorData);
+                          alert(`Төлбөр амжилттай боловч захиалга үүсгэхэд алдаа гарлаа: ${errorData.error || 'Unknown error'}`);
+                        }
+                      } catch (error) {
+                        console.error('Error creating order:', error);
+                        alert('Төлбөр амжилттай боловч захиалга үүсгэхэд алдаа гарлаа.');
+                      }
+                    }}
+                    onPaymentError={(error) => {
+                      console.error('Payment error:', error)
+                      alert(`Төлбөрийн алдаа: ${error}`)
+                    }}
+                  />
+                </div>
+              )}
 
             {/* Security & Shipping Info */}
             <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
@@ -499,8 +575,8 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex flex-col items-center space-y-2">
                   <CreditCard size={24} className="text-purple-600" />
-                  <span className="text-sm font-medium text-gray-900">QPay төлбөрийн систем</span>
-                  <span className="text-xs text-gray-600">Та QR код уншуулан төлбөрөө хийнэ үү</span>
+                  <span className="text-sm font-medium text-gray-900">QPay QR Төлбөр</span>
+                  <span className="text-xs text-gray-600">Утасныхаа камерыг ашиглан QR код уншуулна уу</span>
                 </div>
               </div>
             </div>

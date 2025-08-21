@@ -118,7 +118,7 @@ export async function POST(req: Request) {
       const newOrder = await tx.order.create({
         data: {
           userId: user.id,
-          total,
+          totalAmount: total,
           shippingAddress,
           phone,
           email,
@@ -179,7 +179,7 @@ export async function POST(req: Request) {
       if (orderWithItems) {
         const html = buildOrderEmailHtml({
           orderId: orderWithItems.id,
-          total: orderWithItems.total,
+          total: orderWithItems.totalAmount,
           items: orderWithItems.items.map((i) => ({
             name: i.product.name,
             quantity: i.quantity,

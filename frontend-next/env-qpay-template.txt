@@ -1,0 +1,17 @@
+# QPay API Configuration
+# Copy these variables to your .env.local file
+
+# QPay Merchant Credentials (TUSGAL OPTIC)
+NEXT_PUBLIC_QPAY_MERCHANT_ID=TUSGAL_OPTIC
+NEXT_PUBLIC_QPAY_USERNAME=TUSGAL_OPTIC
+NEXT_PUBLIC_QPAY_PASSWORD=h1H1Wq4S
+
+# QPay API URLs
+NEXT_PUBLIC_QPAY_BASE_URL=https://merchant.qpay.mn
+NEXT_PUBLIC_QPAY_CALLBACK_URL=https://yourdomain.com/api/qpay/callback
+
+# QPay Invoice Code (provided by QPay)
+NEXT_PUBLIC_QPAY_INVOICE_CODE=TUSGAL_OPTIC_INVOICE
+
+# Production Configuration - Ready to use!
+# These are your actual QPay credentials for TUSGAL OPTIC

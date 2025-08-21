@@ -23,13 +23,13 @@ model Category {
   id          String    @id @default(cuid())
   name        String    @unique
   description String?
-  products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  products    Product[]
 }
 
 model Product {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String
   price       Float
@@ -37,67 +37,63 @@ model Product {
   stock       Int
   faceShape   String?
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   cartItems   CartItem[]
   orderItems  OrderItem[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  category    Category?   @relation(fields: [categoryId], references: [id])
 }
 
 model CartItem {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   productId String
   quantity  Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  userId      String?
-  user        User?       @relation(fields: [userId], references: [id])
-  items       OrderItem[]
-  totalAmount Float       @default(0)
-  status      OrderStatus @default(PENDING)
-  paid        Boolean     @default(false)
+  id              String      @id @default(cuid())
+  userId          String?
+  status          OrderStatus @default(PENDING)
+  paid            Boolean     @default(false)
   shippingAddress String?
-  phone       String?
-  email       String?
-  latitude    Float?
-  longitude   Float?
-  
-  // QPay Integration Fields
-  paymentId   String?     // QPay payment ID
-  invoiceId   String?     // QPay invoice ID
-  qpayStatus  String?     // QPay payment status
-  
-  // Timestamps
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  phone           String?
+  email           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  latitude        Float?
+  longitude       Float?
+  invoiceId       String?
+  paymentId       String?
+  qpayStatus      String?
+  totalAmount     Float       @default(0)
+  user            User?       @relation(fields: [userId], references: [id])
+  items           OrderItem[]
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   orderId   String
   productId String
   quantity  Int
   price     Float
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 enum OrderStatus {
   PENDING
-  PAID
   CONFIRMED
   SHIPPED
   DELIVERED
   CANCELLED
+  PAID
   FAILED
 }

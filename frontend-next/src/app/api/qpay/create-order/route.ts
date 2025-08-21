@@ -98,12 +98,22 @@ export async function POST(request: NextRequest) {
 
       // Create order items
       for (const item of items) {
+        // Get product price from database
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { price: true }
+        });
+        
+        if (!product) {
+          throw new Error(`Product not found: ${item.productId}`);
+        }
+        
         await tx.orderItem.create({
           data: {
             orderId: newOrder.id,
             productId: item.productId,
             quantity: item.quantity,
-            price: item.price || 0
+            price: product.price
           }
         });
 

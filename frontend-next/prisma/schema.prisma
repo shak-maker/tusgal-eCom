@@ -58,10 +58,10 @@ model CartItem {
 
 model Order {
   id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
   items       OrderItem[]
-  total       Float
+  totalAmount Float       @default(0)
   status      OrderStatus @default(PENDING)
   paid        Boolean     @default(false)
   shippingAddress String?
@@ -69,6 +69,13 @@ model Order {
   email       String?
   latitude    Float?
   longitude   Float?
+  
+  // QPay Integration Fields
+  paymentId   String?     // QPay payment ID
+  invoiceId   String?     // QPay invoice ID
+  qpayStatus  String?     // QPay payment status
+  
+  // Timestamps
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -82,12 +89,15 @@ model OrderItem {
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 enum OrderStatus {
   PENDING
+  PAID
   CONFIRMED
   SHIPPED
   DELIVERED
   CANCELLED
+  FAILED
 }

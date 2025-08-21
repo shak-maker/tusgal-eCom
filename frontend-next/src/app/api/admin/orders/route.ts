@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 // GET - Get all orders for admin
 export async function GET(request: Request) {
   try {
+    console.log('Admin orders API called');
+    
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1');
@@ -17,11 +19,12 @@ export async function GET(request: Request) {
       where.status = status;
     }
 
+    console.log('Fetching orders with where clause:', where);
+    
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
         where,
         include: {
-          user: true,
           items: {
             include: {
               product: {
@@ -38,6 +41,8 @@ export async function GET(request: Request) {
       }),
       prisma.order.count({ where })
     ]);
+    
+    console.log(`Found ${orders.length} orders, total: ${total}`);
 
     return NextResponse.json({
       orders,
@@ -49,7 +54,10 @@ export async function GET(request: Request) {
       }
     });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+    console.error('Admin orders API error:', err);
+    return NextResponse.json({ 
+      error: 'Failed to fetch orders',
+      details: err instanceof Error ? err.message : 'Unknown error'
+    }, { status: 500 });
   }
 } 

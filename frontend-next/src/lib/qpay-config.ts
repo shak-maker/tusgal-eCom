@@ -11,21 +11,11 @@ export const qpayConfig: QPayConfig = {
   invoiceCode: process.env.NEXT_PUBLIC_QPAY_INVOICE_CODE || 'TUSGAL_OPTIC_INVOICE',
 };
 
-// Environment-specific configurations
+// Always use production configuration
 export const getQPayConfig = (): QPayConfig => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
-  if (isDevelopment) {
-    return {
-      ...qpayConfig,
-      baseUrl: 'https://merchant.qpay.mn', // Test environment
-      callbackUrl: 'http://localhost:3000/api/qpay/callback', // Local development
-    };
-  }
-  
   return {
     ...qpayConfig,
-    callbackUrl: 'https://tusgal.shop/api/qpay/callback', // Production callback URL
+    callbackUrl: 'https://tusgal.shop/api/qpay/callback', // Always use production domain
   };
 };
 

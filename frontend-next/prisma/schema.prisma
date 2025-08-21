@@ -72,6 +72,8 @@ model Order {
   paymentId       String?
   qpayStatus      String?
   totalAmount     Float       @default(0)
+  pdCm            Float?
+  lensInfo        Json?
   user            User?       @relation(fields: [userId], references: [id])
   items           OrderItem[]
 }

@@ -38,7 +38,7 @@ export default function AdminOrdersPage() {
       const response = await fetch('/api/admin/orders');
       if (response.ok) {
         const data = await response.json();
-        setOrders(data.orders || data); // Handle both response formats
+        setOrders(data.orders || data);
       } else {
         console.error('Failed to fetch orders:', response.statusText);
       }
@@ -101,6 +101,9 @@ export default function AdminOrdersPage() {
                     Дүн
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    PD (см)
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Төлөв
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -125,6 +128,9 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ₮{order.totalAmount?.toLocaleString() || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {typeof order.pdCm === 'number' ? order.pdCm : '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

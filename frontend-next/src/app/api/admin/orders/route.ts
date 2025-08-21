@@ -33,7 +33,8 @@ export async function GET(request: Request) {
                 }
               }
             }
-          }
+          },
+          user: true,
         },
         skip,
         take: limit,

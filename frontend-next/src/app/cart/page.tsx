@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ShoppingBag, ArrowLeft } from 'lucide-react'
 import CartItem from '@/components/cartItem'
+import { useOrderExtrasStore } from '@/lib/orderExtrasStore'
+import { useUserPreferencesStore } from '@/lib/userPreferencesStore'
 
 type CartItem = {
   id: string
@@ -21,6 +23,9 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const { buyingEyeglasses, setBuyingEyeglasses, lensInfo, setLensInfo } = useOrderExtrasStore()
+  const { pdCm } = useUserPreferencesStore()
 
   useEffect(() => {
     fetchCart()
@@ -175,6 +180,71 @@ export default function CartPage() {
                       isUpdating={updating === item.product.id}
                     />
                   ))}
+                </div>
+
+                {/* Eyeglasses toggle and lens form */}
+                <div className="p-6 border-t border-gray-200">
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={buyingEyeglasses}
+                      onChange={(e) => setBuyingEyeglasses(e.target.checked)}
+                    />
+                    <span className="text-gray-800 font-medium">Та харааны шил захиалж байна уу?</span>
+                  </label>
+
+                  {buyingEyeglasses && (
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">PD (см)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="ж: 6.5"
+                          defaultValue={lensInfo?.pdCm ?? pdCm ?? ''}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value)
+                            setLensInfo({
+                              ...(lensInfo ?? {}),
+                              pdCm: Number.isNaN(v) ? undefined : v,
+                            })
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">Баруун нүд хараа</label>
+                        <input
+                          type="text"
+                          placeholder="ж: -1.25"
+                          value={lensInfo?.rightVision ?? ''}
+                          onChange={(e) => setLensInfo({ ...(lensInfo ?? {}), rightVision: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">Зүүн нүд хараа</label>
+                        <input
+                          type="text"
+                          placeholder="ж: -1.00"
+                          value={lensInfo?.leftVision ?? ''}
+                          onChange={(e) => setLensInfo({ ...(lensInfo ?? {}), leftVision: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm text-gray-700 mb-1">Тэмдэглэл</label>
+                        <textarea
+                          value={lensInfo?.notes ?? ''}
+                          onChange={(e) => setLensInfo({ ...(lensInfo ?? {}), notes: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -6,6 +6,8 @@ import Image from 'next/image'
 import { ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { QPayPayment } from '@/components/QPayPayment'
+import { useUserPreferencesStore } from '@/lib/userPreferencesStore'
+import { useOrderExtrasStore } from '@/lib/orderExtrasStore'
 
 const MapPicker = dynamic(() => import('./MapPicker'), { ssr: false })
 
@@ -23,6 +25,8 @@ type CartItem = {
 export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
+  const { pdCm } = useUserPreferencesStore()
+  const { buyingEyeglasses, lensInfo } = useOrderExtrasStore()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -122,7 +126,9 @@ export default function CheckoutPage() {
         email: formData.email,
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
         longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
-        totalAmount: cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
+        totalAmount: cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
+        pdCm: typeof pdCm === 'number' ? pdCm : undefined,
+        lensInfo: buyingEyeglasses ? lensInfo : undefined,
       }
 
       // Store order data and show payment
@@ -499,6 +505,18 @@ export default function CheckoutPage() {
               {/* QPay Payment Section */}
               {showPayment && orderData && (
                 <div className="mt-6">
+                  {/* Lens info summary */}
+                  {orderData?.lensInfo && (
+                    <div className="mb-4 p-4 border border-blue-200 bg-blue-50 rounded-lg text-sm text-blue-900">
+                      <div className="font-semibold mb-1">Лензийн мэдээлэл:</div>
+                      <div>PD: {orderData.lensInfo.pdCm ?? pdCm ?? '—'} см</div>
+                      <div>Баруун нүд: {orderData.lensInfo.rightVision ?? '—'}</div>
+                      <div>Зүүн нүд: {orderData.lensInfo.leftVision ?? '—'}</div>
+                      {orderData.lensInfo.notes && (
+                        <div>Тэмдэглэл: {orderData.lensInfo.notes}</div>
+                      )}
+                    </div>
+                  )}
                   <QPayPayment
                     cartItems={cartItems}
                     customerData={formData}
@@ -515,6 +533,8 @@ export default function CheckoutPage() {
                           latitude: orderData.latitude,
                           longitude: orderData.longitude,
                           totalAmount: orderData.totalAmount,
+                          pdCm: orderData.pdCm,
+                          lensInfo: orderData.lensInfo,
                           paymentId: paymentData.paymentId,
                           invoiceId: paymentData.invoiceId,
                           status: 'PAID'

@@ -53,6 +53,29 @@ export default function ProductGrid({
     product: null,
   });
 
+  // Sync with category selected from suggestion section (second-container)
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    (async () => {
+      try {
+        const mod = await import("@/lib/catalogStore");
+        const store = mod.useCatalogStore;
+        const current = store.getState().selectedCategoryId;
+        if (current && current !== selectedCategory) {
+          setSelectedCategory(current);
+        }
+        unsubscribe = store.subscribe((state) => {
+          if (state.selectedCategoryId && state.selectedCategoryId !== selectedCategory) {
+            setSelectedCategory(state.selectedCategoryId);
+          }
+        });
+      } catch {}
+    })();
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [selectedCategory]);
+
   const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch("/api/categories");
@@ -216,7 +239,13 @@ export default function ProductGrid({
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={async () => {
+                    setSelectedCategory(category.id);
+                    try {
+                      const mod = await import("@/lib/catalogStore");
+                      mod.useCatalogStore.getState().setSelectedCategoryId(category.id);
+                    } catch {}
+                  }}
                   className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
                     selectedCategory === category.id
                       ? "bg-blue-600 text-white shadow-lg scale-105"

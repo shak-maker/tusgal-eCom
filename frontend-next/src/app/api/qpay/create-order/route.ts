@@ -18,7 +18,9 @@ export async function POST(request: NextRequest) {
       paymentId,
       invoiceId,
       status,
-      totalAmount
+      totalAmount,
+      pdCm,
+      lensInfo
     } = body;
 
     console.log('Validating required fields...');
@@ -90,7 +92,9 @@ export async function POST(request: NextRequest) {
           paymentId: paymentId || null,
           invoiceId: invoiceId || null,
           qpayStatus: status || 'PAID',
-          paid: status === 'PAID'
+          paid: status === 'PAID',
+          pdCm: typeof pdCm === 'number' ? pdCm : null,
+          lensInfo: lensInfo ? (lensInfo as object) : undefined
         }
       });
       

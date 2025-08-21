@@ -14,9 +14,7 @@ function ContainerFour(){
               Тусгал нүдний эмнэлгийн тухай
             </h2>
             <p className="text-md text-gray-600">
-              Манай нүдний эмнэлэг нь 12 жилийн турш мэргэжлийн өндөр чанартай үйлчилгээ, 
-              эмчилгээ үзүүлж байгаа бөгеөд таны нүдэнд төгс тохирсон нүдний шилийг 
-              бодит туршлага шинжлэх ухаанд үндэслэн санал болгох болно.
+              Ижил нэрт эмнэлгийн доор үйл ажиллагаа явуулж буй Тусгал Оптик нь таны гэр бүлийн харааг хамгаалж өгнө.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
@@ -35,9 +33,9 @@ function ContainerFour(){
                   <div className="flex flex-row items-start gap-5">
                     <Phone className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">Customer Support</h3>
+                      <h3 className="text-lg font-medium text-gray-900">Утсаар холбогдох</h3>
                       <p className="text-gray-600 text-sm">
-                        Aliquam erat volutpat. Integer malesuada turpis id fringilla suscipit. Maccenas ultrices.
+                        Тусгалтай холбогдох утасны дугаар: 77116446
                       </p>
                     </div>
                   </div>
@@ -48,9 +46,9 @@ function ContainerFour(){
                   <div className="flex flex-row items-start gap-3">
                     <ShieldCheck className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">Best Price Guaranteed</h3>
+                      <h3 className="text-lg font-medium text-gray-900">Хямд үнийн баталгаа</h3>
                       <p className="text-gray-600 text-sm">
-                        Aliquam erat volutpat. Integer malesuada turpis id fringilla suscipit. Maccenas ultrices.
+                        Танд за зээл дээрх хамгийн хямд үнээр чанартай шилнүүд худалдаалж байна.
                       </p>
                     </div>
                   </div>
@@ -61,9 +59,9 @@ function ContainerFour(){
                   <div className="flex flex-row items-start gap-3">
                     <MapPin className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">Many Location</h3>
+                      <h3 className="text-lg font-medium text-gray-900">Хаяг, байршил</h3>
                       <p className="text-gray-600 text-sm">
-                        Aliquam erat volutpat. Integer malesuada turpis id fringilla suscipit. Maccenas ultrices.
+                       Хан уул дүүрэг, Сүмбэр tower 2, 3 давхар.
                       </p>
                     </div>
                   </div>

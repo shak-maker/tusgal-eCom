@@ -67,7 +67,7 @@ function Header() {
             </li>
             <li>
               <a href="#about" onClick={(e) => smoothScroll(e, 'second')} className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">
-                Нүүрний хэлбэр олох</a>
+                PD өгөх</a>
             </li>
             <li>
               <a href="#products" onClick={(e) => smoothScroll(e, 'products')} className="text-[rgba(94,172,221,1)] relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-gray-500 after:transition-all after:duration-300 hover:after:w-full">

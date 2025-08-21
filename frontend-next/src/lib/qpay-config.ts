@@ -7,23 +7,16 @@ export const qpayConfig: QPayConfig = {
   username: process.env.NEXT_PUBLIC_QPAY_USERNAME || 'TUSGAL_OPTIC',
   password: process.env.NEXT_PUBLIC_QPAY_PASSWORD || 'h1H1Wq4S',
   baseUrl: process.env.NEXT_PUBLIC_QPAY_BASE_URL || 'https://merchant.qpay.mn',
-  callbackUrl: process.env.NEXT_PUBLIC_QPAY_CALLBACK_URL || 'https://yourdomain.com/api/qpay/callback',
+  callbackUrl: process.env.NEXT_PUBLIC_QPAY_CALLBACK_URL || 'https://tusgal.shop/api/qpay/callback',
   invoiceCode: process.env.NEXT_PUBLIC_QPAY_INVOICE_CODE || 'TUSGAL_OPTIC_INVOICE',
 };
 
-// Environment-specific configurations
+// Always use production configuration
 export const getQPayConfig = (): QPayConfig => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
-  if (isDevelopment) {
-    return {
-      ...qpayConfig,
-      baseUrl: 'https://merchant.qpay.mn', // Test environment
-      callbackUrl: 'http://localhost:3000/api/qpay/callback', // Local development
-    };
-  }
-  
-  return qpayConfig;
+  return {
+    ...qpayConfig,
+    callbackUrl: 'https://tusgal.shop/api/qpay/callback', // Always use production domain
+  };
 };
 
 // QPay API endpoints

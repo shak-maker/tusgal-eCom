@@ -3,13 +3,17 @@ import { prisma } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   try {
+    console.log('Products API called');
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
+    console.log('Category filter:', category);
 
     const whereClause = category && category !== 'all' 
       ? { categoryId: category }
       : {};
+    console.log('Where clause:', whereClause);
 
+    console.log('Fetching products from database...');
     const products = await prisma.product.findMany({
       where: whereClause,
       include: {
@@ -19,11 +23,13 @@ export async function GET(req: NextRequest) {
         createdAt: 'desc',
       },
     });
+    console.log('Products fetched successfully:', products.length);
 
     return NextResponse.json(products);
   } catch (error) {
     console.error('Failed to fetch products:', error);
-    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    return NextResponse.json({ error: 'Failed to fetch products', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 

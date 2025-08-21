@@ -43,7 +43,7 @@ interface OrderItem {
     id: string;
     name: string;
     price: number;
-    category: {
+    category?: {
       name: string;
     };
   };
@@ -58,7 +58,7 @@ interface Order {
   shippingAddress?: string;
   phone?: string;
   email?: string;
-  user: {
+  user?: {
     id: string;
     name?: string;
     email: string;
@@ -402,15 +402,15 @@ const GlassesAdminDashboard = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
+      case 'ХҮЛЭЭГДЭЖ БАЙНА':
         return 'bg-yellow-100 text-yellow-800';
-      case 'CONFIRMED':
+      case 'БАТАЛГААЖСАН':
         return 'bg-blue-100 text-blue-800';
-      case 'SHIPPED':
+      case 'ХҮРГЭЛТ ГАРСАН':
         return 'bg-green-100 text-green-800';
-      case 'DELIVERED':
+      case 'ХҮЛЭЭЖ АВСАН':
         return 'bg-purple-100 text-purple-800';
-      case 'CANCELLED':
+      case 'ЦУЦЛАГДСАН':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -433,7 +433,7 @@ const GlassesAdminDashboard = () => {
   const totalProducts = products.length;
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(order => order.status === 'ХҮЛЭЭГДЭЖ БАЙНА').length;
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -556,10 +556,10 @@ const GlassesAdminDashboard = () => {
                     <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-900">{order.id}</p>
-                        <p className="text-sm text-gray-500">{order.user.name || order.user.email}</p>
+                        <p className="text-sm text-gray-500">{order.user?.name || order.user?.email || 'Unknown User'}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-gray-900">₮{order.total}</p>
+                        <p className="font-medium text-gray-900">₮{order.total || 0}</p>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
                           {order.status}
                         </span>
@@ -852,8 +852,8 @@ const GlassesAdminDashboard = () => {
                   <h3 className="text-lg font-medium mb-4">Order Details - {selectedOrder.id}</h3>
                   <div className="space-y-4">
                     <div>
-                      <p><strong>Customer:</strong> {selectedOrder.user.name || 'N/A'}</p>
-                      <p><strong>Email:</strong> {selectedOrder.user.email}</p>
+                      <p><strong>Customer:</strong> {selectedOrder.user?.name || 'N/A'}</p>
+                      <p><strong>Email:</strong> {selectedOrder.user?.email || 'N/A'}</p>
                       <p><strong>Date:</strong> {formatDate(selectedOrder.createdAt)}</p>
                       <p><strong>Status:</strong> 
                         <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedOrder.status)}`}>
@@ -877,13 +877,13 @@ const GlassesAdminDashboard = () => {
                       <h4 className="font-medium mb-2">Items:</h4>
                       {selectedOrder.items.map((item, index) => (
                         <div key={index} className="flex justify-between py-2 border-b">
-                          <span>{item.product.name} x{item.quantity}</span>
+                          <span>{item.product?.name || 'Unknown Product'} x{item.quantity}</span>
                           <span>₮{item.price}</span>
                         </div>
                       ))}
                       <div className="flex justify-between font-bold text-lg mt-2">
                         <span>Total:</span>
-                        <span>₮{selectedOrder.total}</span>
+                        <span>₮{selectedOrder.total || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -918,22 +918,22 @@ const GlassesAdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{order.user.name || 'N/A'}</div>
-                          <div className="text-sm text-gray-500">{order.user.email}</div>
+                          <div className="text-sm font-medium text-gray-900">{order.user?.name || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{order.user?.email || 'N/A'}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₮{order.total}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₮{order.total || 0}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
                           value={order.status}
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                           className={`text-xs font-semibold rounded-full px-2 py-1 ${getStatusColor(order.status)}`}
                         >
-                          <option value="PENDING">Pending</option>
-                          <option value="CONFIRMED">Confirmed</option>
-                          <option value="SHIPPED">Shipped</option>
-                          <option value="DELIVERED">Delivered</option>
-                          <option value="CANCELLED">Cancelled</option>
+                          <option value="ХҮЛЭЭГДЭЖ БАЙНА">Хүлээгдэж байна</option>
+                          <option value="БАТАЛГААЖСАН">Баталгаажсан</option>
+                          <option value="ХҮРГЭЛТ ГАРСАН">Хүргэлт гарсан</option>
+                          <option value="ХҮЛЭЭЖ АВСАН">Хүлээж авсан</option>
+                          <option value="ЦУЦЛАГДСАН">Цуцлагдсан</option>
                         </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

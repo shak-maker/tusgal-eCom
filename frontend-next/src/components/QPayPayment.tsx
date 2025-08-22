@@ -123,7 +123,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
         paymentDataKeys: paymentData ? Object.keys(paymentData) : 'No paymentData'
       });
     }
-  }, [showPaymentOptions, paymentData?.invoiceId]);
+  }, [showPaymentOptions, paymentData?.invoiceId, paymentData?.qrImage]);
 
   const generateQRCode = async () => {
     console.log('generateQRCode called with paymentData:', paymentData);

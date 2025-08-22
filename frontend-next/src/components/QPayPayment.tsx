@@ -46,6 +46,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'qr' | null>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | null>(null);
 
   const {
     createInvoice,
@@ -58,10 +59,12 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
 
   // Use cartItems prop for total calculation
 
-  // Handle payment success
+  // Handle payment success - only when payment is actually completed
   useEffect(() => {
     if (paymentData && onPaymentSuccess) {
-      onPaymentSuccess(paymentData);
+      // Don't call onPaymentSuccess immediately when invoice is created
+      // Only call it when payment status is actually PAID
+      // This will be handled by the polling mechanism
     }
   }, [paymentData, onPaymentSuccess]);
 
@@ -75,11 +78,21 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   // Start polling for payment status when invoice is created
   useEffect(() => {
     if (paymentData?.invoiceId) {
+      setPaymentStatus('pending');
       const interval = setInterval(async () => {
         const status = await checkPaymentStatus(paymentData.invoiceId);
         if (status?.status === 'PAID') {
           clearInterval(interval);
           setPollingInterval(null);
+          setPaymentStatus('completed');
+          // Call onPaymentSuccess only when payment is actually completed
+          if (onPaymentSuccess) {
+            onPaymentSuccess({
+              ...paymentData,
+              paymentId: status.paymentId,
+              status: status.status
+            });
+          }
         }
       }, 5000); // Check every 5 seconds
 
@@ -90,26 +103,43 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
         setPollingInterval(null);
       };
     }
-  }, [paymentData?.invoiceId, checkPaymentStatus]);
+  }, [paymentData?.invoiceId, checkPaymentStatus, onPaymentSuccess]);
 
-  // Generate QR code locally when QR method is selected
+  // Generate QR code automatically when payment options are shown
   useEffect(() => {
-    if (selectedPaymentMethod === 'qr' && paymentData?.invoiceId) {
+    console.log('QR Code useEffect triggered:', {
+      showPaymentOptions,
+      invoiceId: paymentData?.invoiceId,
+      paymentData: paymentData
+    });
+    
+    if (showPaymentOptions && paymentData?.invoiceId) {
+      console.log('Generating QR code...');
       generateQRCode();
     }
-  }, [selectedPaymentMethod, paymentData?.invoiceId]);
+  }, [showPaymentOptions, paymentData?.invoiceId]);
 
   const generateQRCode = async () => {
-    if (!paymentData?.invoiceId) return;
+    console.log('generateQRCode called with paymentData:', paymentData);
+    
+    if (!paymentData?.invoiceId) {
+      console.log('No invoiceId found, cannot generate QR code');
+      return;
+    }
     
     try {
+      console.log('Generating custom QR code...');
+      
       // Generate QR code with payment information
       const qrData = {
         invoiceId: paymentData.invoiceId,
         invoiceCode: paymentData.invoiceCode,
         amount: paymentData.amount,
-        merchantId: 'TUSGAL_OPTIC'
+        merchantId: 'TUSGAL_OPTIC',
+        timestamp: new Date().toISOString()
       };
+      
+      console.log('QR data to encode:', qrData);
       
       const qrDataUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
         width: 200,
@@ -121,7 +151,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
       });
       
       setQrCodeDataUrl(qrDataUrl);
-      console.log('QR code generated successfully');
+      console.log('QR code generated successfully, data URL length:', qrDataUrl.length);
     } catch (error) {
       console.error('Failed to generate QR code:', error);
       setQrCodeDataUrl('');
@@ -211,6 +241,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     setShowPaymentOptions(false);
     setSelectedPaymentMethod(null);
     setQrCodeDataUrl('');
+    setPaymentStatus(null);
     // Reset the component state
     clearError();
   };
@@ -347,19 +378,24 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             <div className="space-y-4">
               <div className="text-center">
                 <h3 className="text-lg font-semibold mb-2">QR Код</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Нэхэмжлэл амжилттай үүслээ! QR кодыг уншуулан төлбөрөө хийнэ үү:
-                </p>
+                {paymentStatus === 'completed' ? (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-green-800 text-sm font-medium">
+                      ✅ Төлбөр амжилттай! Таны захиалга баталгаажлаа.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 mb-4">
+                    Нэхэмжлэл амжилттай үүслээ! QR кодыг уншуулан төлбөрөө хийнэ үү:
+                  </p>
+                )}
               </div>
 
               <div className="text-center">
-                <Button
-                  onClick={() => handlePaymentMethodSelect('qr')}
-                  className="h-20 w-full max-w-xs flex flex-col items-center justify-center text-lg"
-                >
+                <div className="h-20 w-full max-w-xs flex flex-col items-center justify-center text-lg mx-auto bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
                   <div className="text-3xl mb-2">📱</div>
-                  <span className="text-base font-medium">QR Кодоор төлбөр хийх</span>
-                </Button>
+                  <span className="text-base font-medium text-gray-600">QR Код доор байна</span>
+                </div>
               </div>
 
               <div className="text-center text-sm text-gray-600">
@@ -387,7 +423,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
           )}
 
           {/* QR Code Display */}
-          {selectedPaymentMethod === 'qr' && paymentData && (
+          {showPaymentOptions && paymentData && (
             <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
               <div className="text-center">
                 <h3 className="text-lg font-semibold mb-4">QR Код</h3>
@@ -400,17 +436,24 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                 
                 {/* QR Code Image */}
                 <div className="bg-white p-4 rounded-lg inline-block mb-4">
+                  {(() => { console.log('QR Code Display - qrCodeDataUrl:', qrCodeDataUrl); return null; })()}
                   {qrCodeDataUrl ? (
                     <img 
                       src={qrCodeDataUrl}
                       alt="QPay QR Code"
                       className="w-48 h-48 mx-auto"
+                      onLoad={() => console.log('QR code image loaded successfully')}
+                      onError={(e) => {
+                        console.error('QR code image failed to load:', e);
+                        setQrCodeDataUrl('');
+                      }}
                     />
                   ) : (
                     <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded">
                       <div className="text-center text-gray-500">
                         <div className="text-2xl mb-2">⏳</div>
                         <p className="text-xs">QR код үүсгэж байна...</p>
+                        <p className="text-xs text-red-500">Debug: qrCodeDataUrl is empty</p>
                       </div>
                     </div>
                   )}
@@ -421,22 +464,21 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                   <p>Дүн: <span className="font-semibold">₮{paymentData.amount ? paymentData.amount.toLocaleString() : cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0).toLocaleString()}</span></p>
                 </div>
                 
+                {/* Debug button for testing */}
                 <div className="mt-4 flex gap-2 justify-center">
                   <Button
-                    onClick={() => setSelectedPaymentMethod(null)}
+                    onClick={() => {
+                      console.log('Manual QR generation triggered');
+                      generateQRCode();
+                    }}
                     variant="outline"
                     size="sm"
                   >
-                    Буцах
-                  </Button>
-                  <Button
-                    onClick={generateQRCode}
-                    variant="outline"
-                    size="sm"
-                  >
-                    QR Код Дахин Үүсгэх
+                    QR Код Дахин Үүсгэх (Debug)
                   </Button>
                 </div>
+                
+
               </div>
             </div>
           )}

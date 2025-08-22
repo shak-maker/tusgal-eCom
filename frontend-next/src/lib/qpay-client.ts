@@ -9,7 +9,8 @@ import {
   QPayEbarimtRequest,
   QPayEbarimtResponse,
   QPayErrorResponse,
-  QPayConfig
+  QPayConfig,
+  QPayCallbackData
 } from './qpay-types';
 
 export class QPayClient {

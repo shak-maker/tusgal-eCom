@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        status: latestPayment.status,
+        status: latestPayment.payment_status,
         paymentId: latestPayment.payment_id,
-        amount: latestPayment.amount,
-        createdAt: latestPayment.created_at,
-        updatedAt: latestPayment.updated_at,
+        amount: latestPayment.payment_amount,
+        createdAt: latestPayment.payment_date,
+        updatedAt: latestPayment.payment_date,
         payments: payments,
       },
     });

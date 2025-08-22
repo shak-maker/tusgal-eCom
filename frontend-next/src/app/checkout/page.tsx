@@ -521,7 +521,7 @@ export default function CheckoutPage() {
                     cartItems={cartItems}
                     customerData={formData}
                     onPaymentSuccess={async (paymentData) => {
-                      console.log('Payment successful:', paymentData)
+                      console.log('Payment completed successfully:', paymentData)
                       
                       try {
                         // Create the actual order in the database
@@ -553,7 +553,7 @@ export default function CheckoutPage() {
                           console.log('Order created:', orderResult);
                           
                           if (orderResult.success) {
-                            // Redirect to success page or show success message
+                            // Show success message only when payment is actually completed
                             alert('Төлбөр амжилттай! Таны захиалга баталгаажлаа.');
                             
                             // Optionally redirect to success page

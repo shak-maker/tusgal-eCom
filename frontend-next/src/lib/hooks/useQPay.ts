@@ -7,6 +7,16 @@ interface QPayPaymentData {
   status: string;
   qrCodeUrl: string;
   paymentUrl: string;
+  // QPay's built-in QR data
+  qrText?: string;
+  qrImage?: string;
+  qPayShortUrl?: string;
+  urls?: Array<{
+    name: string;
+    description: string;
+    logo: string;
+    link: string;
+  }>;
 }
 
 interface QPayPaymentStatus {

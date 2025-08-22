@@ -42,12 +42,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        invoiceId: invoice.id,
+        invoiceId: invoice.invoice_id, // Fix: use invoice_id instead of id
         invoiceCode: invoice.invoice_code,
         amount: invoice.amount,
         status: invoice.status,
-        qrCodeUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.id}/qr`, // QPay QR code endpoint
-        paymentUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.id}/pay`, // QPay payment page
+        qrCodeUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/qr`, // Fix: use invoice_id
+        paymentUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/pay`, // Fix: use invoice_id
+        // Use QPay's built-in QR data
+        qrText: invoice.qr_text,
+        qrImage: invoice.qr_image,
+        qPayShortUrl: invoice.qPay_shortUrl,
+        urls: invoice.urls,
       },
     });
   } catch (error) {

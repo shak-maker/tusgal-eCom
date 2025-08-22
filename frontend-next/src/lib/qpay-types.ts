@@ -76,13 +76,22 @@ export interface QPayTax {
 }
 
 export interface QPayInvoiceResponse {
-  id: string;
+  invoice_id: string; // Fix: QPay actually returns invoice_id, not id
   invoice_code: string;
   sender_invoice_no: string;
   amount: number;
   status: string;
   created_at: string;
   updated_at: string;
+  qr_text?: string; // QPay also returns QR code data
+  qr_image?: string; // QPay also returns QR image as base64
+  qPay_shortUrl?: string; // QPay short URL
+  urls?: Array<{
+    name: string;
+    description: string;
+    logo: string;
+    link: string;
+  }>;
 }
 
 export interface QPayPaymentCheckRequest {

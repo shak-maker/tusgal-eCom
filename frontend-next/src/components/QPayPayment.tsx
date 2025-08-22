@@ -134,7 +134,15 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     }
     
     try {
-      console.log('Generating custom QR code...');
+      // Use QPay's pre-generated QR image if available
+      if (paymentData.qrImage) {
+        console.log('Using QPay pre-generated QR image');
+        setQrCodeDataUrl(`data:image/png;base64,${paymentData.qrImage}`);
+        return;
+      }
+
+      // Fallback: Generate QR code using qrcode library
+      console.log('Generating QR code locally using qrcode library');
       
       // Generate QR code with payment information
       const qrData = {
@@ -157,7 +165,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
       });
       
       setQrCodeDataUrl(qrDataUrl);
-      console.log('QR code generated successfully, data URL length:', qrDataUrl.length);
+      console.log('QR code generated successfully, data URL length:', qrCodeDataUrl.length);
     } catch (error) {
       console.error('Failed to generate QR code:', error);
       setQrCodeDataUrl('');

@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { getMongolianStatus } from '@/lib/orderStatusMap';
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -138,11 +139,15 @@ export default function AdminOrdersPage() {
                           ? 'bg-green-100 text-green-800'
                           : order.status === 'PENDING'
                           ? 'bg-yellow-100 text-yellow-800'
+                          : order.status === 'SHIPPED'
+                          ? 'bg-blue-100 text-blue-800'
+                          : order.status === 'DELIVERED'
+                          ? 'bg-green-100 text-green-800'
+                          : order.status === 'CANCELLED'
+                          ? 'bg-red-100 text-red-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {order.status === 'PAID' ? 'Төлөгдсөн' : 
-                         order.status === 'PENDING' ? 'Хүлээгдэж буй' : 
-                         order.status || 'Тодорхойгүй'}
+                        {getMongolianStatus(order.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

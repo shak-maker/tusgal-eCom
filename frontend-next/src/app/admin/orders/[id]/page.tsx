@@ -4,6 +4,7 @@ import React from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { getMongolianStatus, getAvailableStatuses } from '@/lib/orderStatusMap'
 
 export default function AdminOrderDetailPage() {
 	const router = useRouter()
@@ -11,6 +12,7 @@ export default function AdminOrderDetailPage() {
 	const { user, loading, isAdmin } = useAuth()
 	const [order, setOrder] = React.useState<any | null>(null)
 	const [fetching, setFetching] = React.useState(true)
+	const [updating, setUpdating] = React.useState(false)
 
 	React.useEffect(() => {
 		if (!loading) {
@@ -41,6 +43,30 @@ export default function AdminOrderDetailPage() {
 			}
 		})()
 	}, [params])
+
+	const updateOrderStatus = async (newStatus: string) => {
+		try {
+			setUpdating(true)
+			const response = await fetch(`/api/admin/orders/${order.id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ status: newStatus }),
+			})
+
+			if (response.ok) {
+				const updatedOrder = await response.json()
+				setOrder(updatedOrder)
+			} else {
+				console.error('Failed to update order status')
+			}
+		} catch (error) {
+			console.error('Error updating order status:', error)
+		} finally {
+			setUpdating(false)
+		}
+	}
 
 	if (loading || fetching) {
 		return (
@@ -78,7 +104,22 @@ export default function AdminOrderDetailPage() {
 					<div className="bg-white p-6 rounded-lg shadow">
 						<h2 className="text-lg font-semibold mb-4">Захиалгын мэдээлэл</h2>
 						<div className="space-y-2 text-sm text-gray-800">
-							<div>Төлөв: {order.status}</div>
+							<div className="flex items-center gap-3">
+								<span>Төлөв:</span>
+								<select
+									value={order.status}
+									onChange={(e) => updateOrderStatus(e.target.value)}
+									disabled={updating}
+									className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white"
+								>
+									{getAvailableStatuses().map((status) => (
+										<option key={status.value} value={status.value}>
+											{status.label}
+										</option>
+									))}
+								</select>
+								{updating && <span className="text-blue-600 text-xs">Шинэчилж байна...</span>}
+							</div>
 							<div>Нийт дүн: ₮{order.totalAmount?.toLocaleString?.() ?? order.totalAmount}</div>
 							<div>PD (см): {typeof order.pdCm === 'number' ? order.pdCm : '—'}</div>
 						</div>

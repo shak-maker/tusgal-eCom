@@ -107,29 +107,39 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
 
   // Generate QR code automatically when payment options are shown
   useEffect(() => {
+    console.log('QR Code useEffect triggered:', {
+      showPaymentOptions,
+      invoiceId: paymentData?.invoiceId,
+      paymentData: paymentData
+    });
+    
     if (showPaymentOptions && paymentData?.invoiceId) {
+      console.log('Generating QR code...');
       generateQRCode();
     }
   }, [showPaymentOptions, paymentData?.invoiceId]);
 
   const generateQRCode = async () => {
-    if (!paymentData?.invoiceId) return;
+    console.log('generateQRCode called with paymentData:', paymentData);
+    
+    if (!paymentData?.invoiceId) {
+      console.log('No invoiceId found, cannot generate QR code');
+      return;
+    }
     
     try {
-      // Use QPay's official QR code URL if available
-      if (paymentData.qrCodeUrl) {
-        setQrCodeDataUrl(paymentData.qrCodeUrl);
-        console.log('Using QPay QR code URL:', paymentData.qrCodeUrl);
-        return;
-      }
+      console.log('Generating custom QR code...');
       
-      // Fallback: Generate QR code with payment information
+      // Generate QR code with payment information
       const qrData = {
         invoiceId: paymentData.invoiceId,
         invoiceCode: paymentData.invoiceCode,
         amount: paymentData.amount,
-        merchantId: 'TUSGAL_OPTIC'
+        merchantId: 'TUSGAL_OPTIC',
+        timestamp: new Date().toISOString()
       };
+      
+      console.log('QR data to encode:', qrData);
       
       const qrDataUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
         width: 200,
@@ -141,7 +151,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
       });
       
       setQrCodeDataUrl(qrDataUrl);
-      console.log('QR code generated successfully');
+      console.log('QR code generated successfully, data URL length:', qrDataUrl.length);
     } catch (error) {
       console.error('Failed to generate QR code:', error);
       setQrCodeDataUrl('');
@@ -426,30 +436,24 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                 
                 {/* QR Code Image */}
                 <div className="bg-white p-4 rounded-lg inline-block mb-4">
+                  {(() => { console.log('QR Code Display - qrCodeDataUrl:', qrCodeDataUrl); return null; })()}
                   {qrCodeDataUrl ? (
-                    qrCodeDataUrl.startsWith('data:') ? (
-                      <img 
-                        src={qrCodeDataUrl}
-                        alt="QPay QR Code"
-                        className="w-48 h-48 mx-auto"
-                      />
-                    ) : (
-                      <img 
-                        src={qrCodeDataUrl}
-                        alt="QPay QR Code"
-                        className="w-48 h-48 mx-auto"
-                        onError={(e) => {
-                          console.error('Failed to load QR code image:', e);
-                          // Fallback to generating QR code locally
-                          generateQRCode();
-                        }}
-                      />
-                    )
+                    <img 
+                      src={qrCodeDataUrl}
+                      alt="QPay QR Code"
+                      className="w-48 h-48 mx-auto"
+                      onLoad={() => console.log('QR code image loaded successfully')}
+                      onError={(e) => {
+                        console.error('QR code image failed to load:', e);
+                        setQrCodeDataUrl('');
+                      }}
+                    />
                   ) : (
                     <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded">
                       <div className="text-center text-gray-500">
                         <div className="text-2xl mb-2">⏳</div>
                         <p className="text-xs">QR код үүсгэж байна...</p>
+                        <p className="text-xs text-red-500">Debug: qrCodeDataUrl is empty</p>
                       </div>
                     </div>
                   )}
@@ -458,6 +462,20 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                 <div className="text-sm text-gray-600 space-y-1">
                   <p>Нэхэмжлэлийн дугаар: <span className="font-mono">{paymentData.invoiceCode || 'Уншиж байна...'}</span></p>
                   <p>Дүн: <span className="font-semibold">₮{paymentData.amount ? paymentData.amount.toLocaleString() : cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0).toLocaleString()}</span></p>
+                </div>
+                
+                {/* Debug button for testing */}
+                <div className="mt-4 flex gap-2 justify-center">
+                  <Button
+                    onClick={() => {
+                      console.log('Manual QR generation triggered');
+                      generateQRCode();
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    QR Код Дахин Үүсгэх (Debug)
+                  </Button>
                 </div>
                 
 

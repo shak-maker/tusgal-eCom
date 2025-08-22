@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log('QPay invoice response:', JSON.stringify(invoice, null, 2));
+
     return NextResponse.json({
       success: true,
       data: {

@@ -116,6 +116,12 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     if (showPaymentOptions && paymentData?.invoiceId) {
       console.log('Generating QR code...');
       generateQRCode();
+    } else {
+      console.log('QR Code generation skipped:', {
+        showPaymentOptions,
+        hasInvoiceId: !!paymentData?.invoiceId,
+        paymentDataKeys: paymentData ? Object.keys(paymentData) : 'No paymentData'
+      });
     }
   }, [showPaymentOptions, paymentData?.invoiceId]);
 
@@ -204,7 +210,9 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const handleCreateInvoice = async () => {
     // If customer data is provided via props, use it directly
     if (propCustomerData) {
+      console.log('Creating invoice with prop customer data:', propCustomerData);
       const result = await createInvoice(propCustomerData);
+      console.log('Invoice creation result:', result);
       if (result) {
         setShowPaymentOptions(true);
         setValidationErrors({});

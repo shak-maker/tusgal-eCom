@@ -52,6 +52,7 @@ export class QPayClient {
       this.tokenExpiry = currentTimestamp + authData.expires_in;
       
       console.log(`✅ QPay token obtained, expires at: ${new Date(this.tokenExpiry * 1000).toISOString()}`);
+      console.log(`Token: ${this.accessToken}`);
       
       return this.accessToken;
     } catch (error) {
@@ -65,7 +66,10 @@ export class QPayClient {
     options: RequestInit = {}
   ): Promise<T> {
     const token = await this.getAuthToken();
-    
+
+    console.log(`📞 Making authenticated request to ${endpoint} with token: ${token}`);
+    console.log('Request options:', JSON.stringify(options, null, 2));
+
     const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
       ...options,
       headers: {

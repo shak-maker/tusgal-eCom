@@ -76,6 +76,7 @@ export interface QPayTax {
 }
 
 export interface QPayInvoiceResponse {
+    id: string;
   invoice_id: string; // Fix: QPay actually returns invoice_id, not id
   invoice_code: string;
   sender_invoice_no: string;

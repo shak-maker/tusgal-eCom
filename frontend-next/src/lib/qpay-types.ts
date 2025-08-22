@@ -94,13 +94,40 @@ export interface QPayPaymentCheckRequest {
   };
 }
 
+// Updated payment response to match official QPay documentation
 export interface QPayPaymentResponse {
-  id: string;
   payment_id: string;
-  amount: number;
-  status: string;
-  created_at: string;
-  updated_at: string;
+  payment_date: string;
+  payment_status: 'NEW' | 'FAILED' | 'PAID' | 'REFUNDED';
+  payment_fee: number;
+  payment_amount: number;
+  payment_currency: string;
+  payment_wallet: string;
+  payment_name: string;
+  payment_description: string;
+  qr_code?: string;
+  paid_by: 'P2P' | 'CARD';
+  object_type: 'MERCHANT' | 'INVOICE' | 'QR';
+  object_id: string;
+}
+
+// QPay callback data structure
+export interface QPayCallbackData {
+  payment_id: string;
+  payment_date: string;
+  payment_status: 'NEW' | 'FAILED' | 'PAID' | 'REFUNDED';
+  payment_fee: number;
+  payment_amount: number;
+  payment_currency: string;
+  payment_wallet: string;
+  payment_name: string;
+  payment_description: string;
+  qr_code?: string;
+  paid_by: 'P2P' | 'CARD';
+  object_type: 'MERCHANT' | 'INVOICE' | 'QR';
+  object_id: string;
+  invoice_id?: string;
+  sender_invoice_no?: string;
 }
 
 export interface QPayPaymentListRequest {

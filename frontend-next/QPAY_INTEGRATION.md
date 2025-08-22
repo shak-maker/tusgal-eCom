@@ -1,208 +1,201 @@
-# QPay API v2 Integration Guide
+# QPay Integration Documentation
 
-This guide explains how to integrate QPay payment processing into your Next.js e-commerce application.
+This document explains how our QPay integration works with the official QPay API documentation.
 
-## 🚀 Quick Start
+## Overview
 
-### 1. Environment Variables
+Our QPay integration follows the official QPay API v2 specification from [https://developer.qpay.mn/](https://developer.qpay.mn/). The integration handles payment processing, callbacks, and status management for the e-commerce platform.
 
-Create a `.env.local` file in your project root with the following QPay configuration:
+## Key Components
 
-```bash
-# QPay API Configuration
-NEXT_PUBLIC_QPAY_MERCHANT_ID=your_merchant_id_here
-NEXT_PUBLIC_QPAY_USERNAME=your_username_here
-NEXT_PUBLIC_QPAY_PASSWORD=your_password_here
-NEXT_PUBLIC_QPAY_BASE_URL=https://merchant.qpay.mn
-NEXT_PUBLIC_QPAY_CALLBACK_URL=https://yourdomain.com/api/qpay/callback
-NEXT_PUBLIC_QPAY_INVOICE_CODE=your_invoice_code_here
+### 1. QPay Client (`/src/lib/qpay-client.ts`)
+
+The main client class that handles all QPay API interactions:
+
+- **Authentication**: Manages OAuth 2.0 token lifecycle
+- **Invoice Creation**: Creates payment invoices with detailed line items
+- **Payment Checking**: Verifies payment status
+- **Payment Management**: Handles cancellations, refunds, and e-barimt
+
+### 2. QPay Types (`/src/lib/qpay-types.ts`)
+
+TypeScript interfaces that match the official QPay API structure:
+
+- `QPayCallbackData`: Matches official callback response structure
+- `QPayPaymentResponse`: Updated to match official payment response
+- `QPayInvoiceRequest`: Invoice creation request structure
+
+### 3. Callback Handler (`/src/app/api/qpay/callback/route.ts`)
+
+Handles QPay payment callbacks with proper status mapping:
+
+- **PAID**: Payment successful
+- **FAILED**: Payment failed
+- **REFUNDED**: Payment refunded
+- **NEW**: Payment created but not processed
+
+## Official QPay API Integration
+
+### Authentication
+
+```typescript
+// OAuth 2.0 authentication with client_id and client_secret
+POST https://merchant-sandbox.qpay.mn/v2/auth/token
+Authorization: Basic {base64(username:password)}
 ```
 
-**For Testing/Development:**
-```bash
-NEXT_PUBLIC_QPAY_MERCHANT_ID=TEST_MERCHANT
-NEXT_PUBLIC_QPAY_USERNAME=TEST_MERCHANT
-NEXT_PUBLIC_QPAY_PASSWORD=WBDUzy8n
-NEXT_PUBLIC_QPAY_INVOICE_CODE=TEST_INVOICE
+### Invoice Creation
+
+```typescript
+// Create invoice with detailed line items
+POST https://merchant-sandbox.qpay.mn/v2/invoice
+Authorization: Bearer {access_token}
 ```
 
-### 2. Files Created
+### Payment Status Check
 
-The integration includes the following files:
+```typescript
+// Check payment status using object_id
+POST https://merchant-sandbox.qpay.mn/v2/payment/check
+Authorization: Bearer {access_token}
+```
 
-- `src/lib/qpay-types.ts` - TypeScript interfaces for QPay API
-- `src/lib/qpay-client.ts` - QPay API client class
-- `src/lib/qpay-config.ts` - Configuration and constants
-- `src/lib/hooks/useQPay.ts` - React hook for QPay functionality
-- `src/components/QPayPayment.tsx` - Payment component
-- `src/app/api/qpay/create-invoice/route.ts` - Invoice creation API
-- `src/app/api/qpay/check-payment/route.ts` - Payment status check API
-- `src/app/api/qpay/callback/route.ts` - Webhook callback handler
+## Callback Structure
 
-## 🔧 Usage
+Our callback handler processes the official QPay callback structure:
 
-### Basic Integration
-
-Import and use the QPayPayment component in your checkout page:
-
-```tsx
-import { QPayPayment } from '@/components/QPayPayment';
-
-export default function CheckoutPage() {
-  const handlePaymentSuccess = (paymentData: any) => {
-    console.log('Payment successful:', paymentData);
-    // Redirect to success page, clear cart, etc.
-  };
-
-  const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
-    // Show error message to user
-  };
-
-  return (
-    <div>
-      <h1>Checkout</h1>
-      <QPayPayment
-        onPaymentSuccess={handlePaymentSuccess}
-        onPaymentError={handlePaymentError}
-      />
-    </div>
-  );
+```typescript
+interface QPayCallbackData {
+  payment_id: string;           // QPay payment ID
+  payment_date: string;         // Payment timestamp
+  payment_status: 'NEW' | 'FAILED' | 'PAID' | 'REFUNDED';
+  payment_fee: number;          // Transaction fee
+  payment_amount: number;       // Payment amount
+  payment_currency: string;     // Currency (MNT)
+  payment_wallet: string;       // Wallet ID
+  payment_name: string;         // Payment name
+  payment_description: string;  // Payment description
+  qr_code?: string;            // QR code used
+  paid_by: 'P2P' | 'CARD';     // Payment method
+  object_type: 'MERCHANT' | 'INVOICE' | 'QR';
+  object_id: string;           // Invoice or object ID
+  invoice_id?: string;         // Invoice ID (if applicable)
+  sender_invoice_no?: string;  // Your invoice number
 }
 ```
 
-### Using the Hook
+## Payment Status Mapping
 
-For more control, use the `useQPay` hook directly:
+| QPay Status | Our Handler | Description |
+|-------------|-------------|-------------|
+| `PAID` | `handleSuccessfulPayment` | Payment completed successfully |
+| `FAILED` | `handleFailedPayment` | Payment failed or declined |
+| `REFUNDED` | `handleRefundedPayment` | Payment was refunded |
+| `NEW` | `handleNewPayment` | Payment created, pending processing |
 
-```tsx
-import { useQPay } from '@/lib/hooks/useQPay';
+## Configuration
 
-function CustomPaymentForm() {
-  const { createInvoice, checkPaymentStatus, isLoading, error } = useQPay();
+QPay configuration is managed through environment variables:
 
-  const handleSubmit = async (customerData: any) => {
-    const invoice = await createInvoice(customerData);
-    if (invoice) {
-      // Handle invoice creation success
-      console.log('Invoice created:', invoice);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Your custom form fields */}
-    </form>
-  );
-}
+```env
+QPAY_USERNAME=your_client_id
+QPAY_PASSWORD=your_client_secret
+QPAY_BASE_URL=https://merchant-sandbox.qpay.mn
+QPAY_CALLBACK_URL=https://yourdomain.com/api/qpay/callback
+QPAY_INVOICE_CODE=your_invoice_code
 ```
 
-### API Routes
+## Error Handling
 
-The integration provides three main API endpoints:
+The integration includes comprehensive error handling:
 
-1. **POST /api/qpay/create-invoice** - Creates a QPay invoice
-2. **POST /api/qpay/check-payment** - Checks payment status
-3. **POST /api/qpay/callback** - Handles QPay webhooks
+- **Authentication Errors**: Token refresh and retry logic
+- **API Errors**: Proper error response parsing
+- **Callback Errors**: Validation and logging
+- **Network Errors**: Retry mechanisms
 
-## 📱 Payment Flow
+## Security Considerations
 
-1. **Customer fills out form** with name, email, and phone
-2. **Invoice is created** via QPay API
-3. **Payment options are shown** (QR code or card payment)
-4. **Customer completes payment** on QPay platform
-5. **Payment status is monitored** via polling and webhooks
-6. **Success/failure is handled** and cart is updated accordingly
+1. **Token Management**: Automatic token refresh with expiry tracking
+2. **Callback Validation**: Required field validation
+3. **HTTPS Only**: All API calls use HTTPS
+4. **Error Logging**: Comprehensive error logging for debugging
 
-## 🔒 Security Considerations
+## Testing
 
-- **Never expose credentials** in client-side code
-- **Use environment variables** for sensitive data
-- **Validate all inputs** before sending to QPay
-- **Implement proper error handling** for failed payments
-- **Use HTTPS** in production for all API calls
+### Sandbox Environment
 
-## 🧪 Testing
+Use QPay sandbox for testing:
+- Base URL: `https://merchant-sandbox.qpay.mn`
+- Test credentials provided by QPay
+- Test QR codes for payment simulation
 
-### Test Credentials
+### Production Environment
 
-QPay provides test credentials for development:
-- Username: `TEST_MERCHANT`
-- Password: `WBDUzy8n`
+For production:
 - Base URL: `https://merchant.qpay.mn`
+- Production credentials from QPay
+- Real payment processing
 
-### Test Scenarios
+## Integration Flow
 
-1. **Successful Payment Flow**
-   - Create invoice
-   - Complete payment
-   - Verify callback received
-   - Check payment status
+1. **Order Creation**: User creates order in frontend
+2. **Invoice Creation**: QPay invoice created with order details
+3. **Payment Processing**: User pays via QPay QR or app
+4. **Callback Processing**: QPay sends callback with payment status
+5. **Order Update**: Order status updated based on payment result
+6. **Confirmation**: User receives confirmation
 
-2. **Error Handling**
-   - Invalid credentials
-   - Network failures
-   - Invalid invoice data
-   - Payment cancellations
-
-## 📊 Monitoring & Debugging
-
-### Logs
-
-Check your server logs for:
-- QPay API requests/responses
-- Callback webhook data
-- Payment status updates
-- Error messages
+## Troubleshooting
 
 ### Common Issues
 
-1. **Authentication Failed**
-   - Check credentials in environment variables
-   - Verify QPay account status
+1. **Authentication Failures**: Check credentials and token expiry
+2. **Callback Not Received**: Verify callback URL configuration
+3. **Payment Status Mismatch**: Check object_id mapping
+4. **Network Timeouts**: Implement retry logic
 
-2. **Callback Not Received**
-   - Ensure callback URL is accessible
-   - Check firewall/network settings
-   - Verify QPay webhook configuration
+### Debugging
 
-3. **Payment Status Not Updating**
-   - Check polling interval
-   - Verify invoice ID format
-   - Check QPay API response
+Enable detailed logging:
+```typescript
+console.log('QPay callback received:', JSON.stringify(body, null, 2));
+```
 
-## 🚀 Production Deployment
+## API Endpoints
 
-### Environment Setup
+### Our Endpoints
 
-1. **Update environment variables** with production credentials
-2. **Configure callback URL** to your production domain
-3. **Set up SSL certificates** for HTTPS
-4. **Configure webhook endpoints** in QPay dashboard
+- `POST /api/qpay/create-invoice` - Create payment invoice
+- `POST /api/qpay/callback` - Handle QPay callbacks
+- `POST /api/qpay/check-payment` - Check payment status
+- `POST /api/qpay/create-order` - Create order after payment
 
-### Monitoring
+### QPay Endpoints Used
 
-1. **Set up logging** for payment transactions
-2. **Monitor API response times**
-3. **Track payment success rates**
-4. **Set up alerts** for failed payments
+- `POST /v2/auth/token` - Get access token
+- `POST /v2/invoice` - Create invoice
+- `POST /v2/payment/check` - Check payment status
+- `DELETE /v2/payment/cancel/{payment_id}` - Cancel payment
+- `DELETE /v2/payment/refund/{payment_id}` - Refund payment
 
-## 📚 Additional Resources
+## Best Practices
 
-- [QPay API Documentation](https://merchant.qpay.mn/docs)
-- [QPay Merchant Portal](https://merchant.qpay.mn)
-- [QPay Support](mailto:support@qpay.mn)
+1. **Always validate callbacks**: Check required fields
+2. **Handle all payment statuses**: Don't ignore any status
+3. **Log everything**: For debugging and audit trails
+4. **Use proper error handling**: Graceful degradation
+5. **Test thoroughly**: Use sandbox environment
+6. **Monitor callbacks**: Ensure reliable delivery
 
-## 🤝 Support
+## Support
 
-If you encounter issues:
+For QPay API support:
+- Email: info@qpay.mn
+- Documentation: https://developer.qpay.mn/
+- API Status: Check QPay merchant portal
 
-1. Check the logs for error messages
-2. Verify your QPay credentials
-3. Test with QPay's test environment
-4. Contact QPay support for API-related issues
-5. Check this project's issues for known problems
-
-## 📝 License
-
-This integration is provided as-is for educational and development purposes. Please ensure compliance with QPay's terms of service and your local payment regulations.
+For our integration support:
+- Check logs for detailed error messages
+- Verify configuration settings
+- Test with sandbox environment first

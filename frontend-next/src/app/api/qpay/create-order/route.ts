@@ -40,6 +40,21 @@ export async function POST(request: NextRequest) {
     
     console.log('All required fields present');
 
+    // Validate data types
+    if (typeof totalAmount !== 'number' || totalAmount <= 0) {
+      return NextResponse.json({ 
+        error: 'Total amount must be a positive number',
+        received: totalAmount
+      }, { status: 400 });
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ 
+        error: 'Items must be a non-empty array',
+        received: items
+      }, { status: 400 });
+    }
+
     console.log('Starting database transaction...');
     
     // Create order with transaction
@@ -77,12 +92,20 @@ export async function POST(request: NextRequest) {
         paid: status === 'PAID'
       });
       
-      // Create the order
+      // Validate status is a valid OrderStatus enum value
+      const validStatuses = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'PAID', 'FAILED'];
+      const orderStatus = validStatuses.includes(status) ? status : 'PAID';
+      
+      console.log('Using order status:', orderStatus);
+      
+      // Create the order using relation syntax
       const newOrder = await tx.order.create({
         data: {
-          userId: user.id,
+          user: {
+            connect: { id: user.id }
+          },
           totalAmount: totalAmount,
-          status: status || 'PAID',
+          status: orderStatus as any, // Cast to OrderStatus enum
           shippingAddress,
           phone,
           email,
@@ -160,9 +183,26 @@ export async function POST(request: NextRequest) {
 
   } catch (err) {
     console.error('QPay order creation error:', err);
+    
+    // Provide more detailed error information
+    let errorMessage = 'Failed to create order';
+    let errorDetails = 'Unknown error';
+    
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      errorDetails = err.stack || 'No stack trace available';
+    }
+    
+    // Log the full error for debugging
+    console.error('Full error details:', {
+      message: errorMessage,
+      details: errorDetails,
+      error: err
+    });
+    
     return NextResponse.json({ 
-      error: 'Failed to create order',
-      details: err instanceof Error ? err.message : 'Unknown error'
+      error: errorMessage,
+      details: errorDetails
     }, { status: 500 });
   }
 }

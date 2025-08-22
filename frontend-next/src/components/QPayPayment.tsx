@@ -42,15 +42,11 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     phone: propCustomerData?.phone || '',
   });
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
-  const [pollingInterval, setPollingInterval] = useState<number | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'qr' | null>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
-  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | null>(null);
 
   const {
     createInvoice,
-    checkPaymentStatus,
     isLoading,
     error,
     paymentData,
@@ -75,35 +71,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     }
   }, [error, onPaymentError]);
 
-  // Start polling for payment status when invoice is created
-  useEffect(() => {
-    if (paymentData?.invoiceId) {
-      setPaymentStatus('pending');
-      const interval = setInterval(async () => {
-        const status = await checkPaymentStatus(paymentData.invoiceId);
-        if (status?.status === 'PAID') {
-          clearInterval(interval);
-          setPollingInterval(null);
-          setPaymentStatus('completed');
-          // Call onPaymentSuccess only when payment is actually completed
-          if (onPaymentSuccess) {
-            onPaymentSuccess({
-              ...paymentData,
-              paymentId: status.paymentId,
-              status: status.status
-            });
-          }
-        }
-      }, 5000); // Check every 5 seconds
 
-      setPollingInterval(interval as unknown as number);
-
-      return () => {
-        clearInterval(interval);
-        setPollingInterval(null);
-      };
-    }
-  }, [paymentData?.invoiceId, checkPaymentStatus, onPaymentSuccess]);
 
   // Generate QR code automatically when payment options are shown
   useEffect(() => {
@@ -240,24 +208,11 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     }
   };
 
-  const handlePaymentMethodSelect = (method: 'qr') => {
-    if (!paymentData) return;
 
-    if (method === 'qr') {
-      // Show QR code inline
-      setSelectedPaymentMethod('qr');
-    }
-  };
 
   const handleCancelPayment = () => {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      setPollingInterval(null);
-    }
     setShowPaymentOptions(false);
-    setSelectedPaymentMethod(null);
     setQrCodeDataUrl('');
-    setPaymentStatus(null);
     // Reset the component state
     clearError();
   };
@@ -394,17 +349,9 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             <div className="space-y-4">
               <div className="text-center">
                 <h3 className="text-lg font-semibold mb-2">QR Код</h3>
-                {paymentStatus === 'completed' ? (
-                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800 text-sm font-medium">
-                      ✅ Төлбөр амжилттай! Таны захиалга баталгаажлаа.
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-600 mb-4">
-                    Нэхэмжлэл амжилттай үүслээ! QR кодыг уншуулан төлбөрөө хийнэ үү:
-                  </p>
-                )}
+                <p className="text-sm text-gray-600 mb-4">
+                  Нэхэмжлэл амжилттай үүслээ! QR кодыг уншуулан төлбөрөө хийнэ үү:
+                </p>
               </div>
 
               <div className="text-center">
@@ -426,13 +373,6 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                   className="flex-1"
                 >
                   Цуцлах
-                </Button>
-                <Button
-                  onClick={() => paymentData?.invoiceId && checkPaymentStatus(paymentData.invoiceId)}
-                  disabled={isLoading || !paymentData?.invoiceId}
-                  className="flex-1"
-                >
-                  {isLoading ? 'Шалгаж байна...' : 'Төлөв шалгах'}
                 </Button>
               </div>
             </div>

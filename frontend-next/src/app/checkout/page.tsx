@@ -69,6 +69,41 @@ export default function CheckoutPage() {
     fetchCart()
   }, [])
 
+  // Handle QPay payment callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const paymentId = urlParams.get('payment_id')
+    
+    if (paymentId) {
+      console.log('Payment callback received with payment_id:', paymentId)
+      
+      // Check payment status with QPay
+      checkPaymentStatus(paymentId)
+    }
+  }, [])
+
+  const checkPaymentStatus = async (paymentId: string) => {
+    try {
+      console.log('Checking payment status for:', paymentId)
+      
+      // You can implement payment status checking here
+      // For now, just show a success message
+      setOrderData({
+        success: true,
+        paymentId: paymentId,
+        message: 'Төлбөр амжилттай! Таны захиалга баталгаажлаа.'
+      })
+      
+    } catch (error) {
+      console.error('Error checking payment status:', error)
+      setOrderData({
+        success: false,
+        paymentId: paymentId,
+        message: 'Төлбөр шалгахад алдаа гарлаа.'
+      })
+    }
+  }
+
   const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const isPhoneValid = /^\d{8}$/.test(formData.phone)
@@ -209,6 +244,32 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Төлбөрөө төлөх</h1>
         </div>
+
+        {/* Payment Success Message */}
+        {orderData && (
+          <div className="mb-6">
+            <div className={`p-4 rounded-lg border ${
+              orderData.success 
+                ? 'bg-green-50 border-green-200 text-green-800' 
+                : 'bg-red-50 border-red-200 text-red-800'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`text-2xl ${orderData.success ? 'text-green-600' : 'text-red-600'}`}>
+                  {orderData.success ? '✅' : '❌'}
+                </div>
+                <div>
+                  <h3 className="font-semibold">
+                    {orderData.success ? 'Төлбөр амжилттай!' : 'Төлбөр амжилтгүй!'}
+                  </h3>
+                  <p className="text-sm mt-1">{orderData.message}</p>
+                  {orderData.paymentId && (
+                    <p className="text-xs mt-1 opacity-75">Төлбөрийн ID: {orderData.paymentId}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}

@@ -501,3 +501,4 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     </div>
   );
 };
+// QR code debugging enabled

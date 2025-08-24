@@ -1,9 +1,13 @@
+import Link from "next/link"
 import { Button } from "./ui/button";
 
 function ContainerOne() {
   return (
-    <div id="first" className="grid grid-cols-1 sm:grid-cols-2 mt-20 min-h-[600px] bg-[rgba(194,223,241,1)] p-5">
-      {/* Text Content (unchanged) */}
+    <div
+      id="first"
+      className="grid grid-cols-1 sm:grid-cols-2 mt-20 min-h-[600px] bg-[rgba(194,223,241,1)] p-5"
+    >
+      {/* Text Content */}
       <div className="max-w-2xl w-full flex flex-col justify-center items-start gap-y-6 text-left font-mongolian p-4 md:p-8">
         <h3 className="text-[15px] w-full text-center md:text-left text-black">
           Танд тохирох шил олдохгүй байна уу?
@@ -17,15 +21,21 @@ function ContainerOne() {
           шил санал болгодог.
         </p>
         <div className="w-full flex justify-center md:justify-start">
-          <Button
-            className="bg-[#60b4f2] cursor-pointer mb-5 sm:mb-0 text-white rounded-xl px-10 py-6 shadow-[0_0_25px_#60b4f2] text-xs font-semibold hover:bg-[#4ea3e0] transition"
+          <Link
+            href="./pd.mp4"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            PD ХЭМЖИХ <br /> ЗААВАРЧИЛГАА
-          </Button>
+            <Button
+              className="bg-[#60b4f2] cursor-pointer mb-5 sm:mb-0 text-white rounded-xl px-10 py-6 shadow-[0_0_25px_#60b4f2] text-xs font-semibold hover:bg-[#4ea3e0] transition"
+            >
+              PD ХЭМЖИХ <br /> ЗААВАРЧИЛГАА
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Image Container - Modified for larger size */}
+      {/* Image Container */}
       <div className="flex justify-center items-center p-0 md:p-4">
         <img
           src="/redback.png"

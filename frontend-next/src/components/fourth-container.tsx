@@ -1,72 +1,76 @@
 import { Card } from "./ui/card";
 import { MapPin, ShieldCheck, Phone } from "lucide-react";
 
-function ContainerFour(){
-    return (
-    <section id="fourth" className="py-12 bg-gray-50">
+function ContainerFour() {
+  return (
+    <section id="fourth" className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-8">
-
-
-          {/* Content Section */}
-          <div className="space-y-6 text-center">
-            <h2 className="w-auto text-3xl font-bold text-center text-[rgba(72,98,132,1)]">
+          {/* Title + Intro */}
+          <div className="space-y-6 text-center max-w-4xl w-full">
+            <h2 className="text-3xl md:text-4xl font-bold text-[rgba(72,98,132,1)]">
               Тусгал нүдний эмнэлгийн тухай
             </h2>
-            <p className="text-md text-gray-600">
-              Ижил нэрт эмнэлгийн доор үйл ажиллагаа явуулж буй Тусгал Оптик нь таны гэр бүлийн харааг хамгаалж өгнө.
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+              Ижил нэрт эмнэлгийн доор үйл ажиллагаа явуулж буй <b>Тусгал Оптик</b> нь
+              таны гэр бүлийн харааг хамгаалж өгнө.
             </p>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-              {/* Image Section */}
-              <div className="md:w-[100%]">
-                  <img
-                  src="./kidpic.png"
-                  alt="Eye care professional"
-                  className="w-full h-96 md:h-110 object-cover rounded-lg"
-                  />
-              </div>
+          {/* Content Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+            {/* Image */}
+            <div className="w-full">
+              <img
+                src="./kidpic.png"
+                alt="Eye care professional"
+                className="w-full h-72 sm:h-96 md:h-[450px] object-cover rounded-2xl shadow-md"
+              />
+            </div>
 
-              <div className="flex flex-col justify-center items-center md:ml-10 gap-5 bg-gray-50">
-                {/* Customer Support */}
-                <Card className="max-h-[140] p-3 bg-gray-100 hover:bg-white transition-colors border-0 shadow-none">
-                  <div className="flex flex-row items-start gap-5">
-                    <Phone className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">Утсаар холбогдох</h3>
-                      <p className="text-gray-600 text-sm">
-                        Тусгалтай холбогдох утасны дугаар: 77116446
+            {/* Info Cards */}
+            <div className="flex flex-col gap-6 w-full">
+              {[
+                {
+                  icon: <Phone className="w-6 h-6 text-white" />,
+                  gradient: "from-blue-500 to-blue-600",  
+                  title: "Утсаар холбогдох",
+                  desc: "Тусгалтай холбогдох утасны дугаар: 77116446",
+                },
+                {
+                  icon: <ShieldCheck className="w-6 h-6 text-white" />,
+                  gradient: "from-green-500 to-emerald-600",
+                  title: "Хямд үнийн баталгаа",
+                  desc: "Танд зах зээл дээрх хамгийн хямд үнэ.",
+                },
+                {
+                  icon: <MapPin className="w-6 h-6 text-white" />,
+                  gradient: "from-purple-500 to-violet-600",
+                  title: "Хаяг, байршил",
+                  desc: "Хан уул дүүрэг, Сүмбэр tower 2, 3 давхар.",
+                },
+              ].map((item, i) => (
+                <Card
+                  key={i}
+                  className="p-5 bg-white hover:bg-gray-50 transition-all duration-300 border border-gray-200 shadow-sm hover:shadow-md"
+                >
+                  <div className="flex flex-row items-start gap-4">
+                    <div
+                      className={`bg-gradient-to-br ${item.gradient} rounded-xl p-3 shadow-lg flex items-center justify-center`}
+                    >
+                      {item.icon}
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="text-lg font-semibold text-[rgba(72,98,132,1)]">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                        {item.desc}
                       </p>
                     </div>
                   </div>
                 </Card>
-
-                {/* Best Price Guaranteed */}
-                <Card className="max-h-[140] p-3 bg-gray-100 hover:bg-white transition-colors border-0 shadow-none">
-                  <div className="flex flex-row items-start gap-3">
-                    <ShieldCheck className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">Хямд үнийн баталгаа</h3>
-                      <p className="text-gray-600 text-sm">
-                        Танд за зээл дээрх хамгийн хямд үнээр чанартай шилнүүд худалдаалж байна.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Many Location */}
-                <Card className="max-h-[140] p-3 bg-gray-100 hover:bg-white transition-colors border-0 shadow-none">
-                  <div className="flex flex-row items-start gap-3">
-                    <MapPin className="border-2 border-[rgba(196,196,196,1)] bg-[rgba(196,196,196,1)] rounded-lg p-2 text-center mt-0 w-15 h-15 text-white" />
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">Хаяг, байршил</h3>
-                      <p className="text-gray-600 text-sm">
-                       Хан уул дүүрэг, Сүмбэр tower 2, 3 давхар.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
+              ))}
             </div>
           </div>
         </div>

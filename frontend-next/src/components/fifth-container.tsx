@@ -2,8 +2,8 @@
 function ContainerFive(){
 
     const images = [
-        "./rocklee.jpg",
-        "./itachi222.png",
+        "./ehnii.jpg",
+        "./hoyr.jpg",
     ]
     
     const imageElements = images.map((image, index) => (

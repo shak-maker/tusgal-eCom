@@ -14,7 +14,7 @@ function ContainerThree(){
                         </div>
                         <div className="sm:w-[70%]">
                             <h3 className="text-2xl font-bold mb-6 text-[rgba(72,98,132,1)] border-gray-200">PD(Нүдний зай) </h3>
-                            <p className="text-md leading-relaxed text-gray-800">Таны нүдний хүүхэн харааны хоорондох зайг авж таны нүүрэнд тохирсон шилийг санал болгоно.</p>
+                            <p className="text-md leading-relaxed text-gray-800">Таны нүдний хүүхэн харааны хоорондох зайг авж таны нүүрэнд тохирсон шилийг хийж өгнө. Толгой эргэж, нүд өвдөхгүй, толгой өвдөхгүй байх давуу талтай. </p>
                         </div>
                     </div>
 

@@ -16,50 +16,50 @@ function ContainerSix(){
     {
       id: 1,
       rating: 5,
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
-      author: "B Tamir",
-      location: "Chicago, Illinois",
-      image: "./itachi222.png"
+      text: "Хүүхдийнхээ шилийг байнга тусгалаар хийлгэдэг шүү. Маш эвтэйхэн шил хийдэг. Дараа хөнгөлөлт үзүүүлээрэй.",
+      author: "Baysgalgan Baysgalan",
+      location: "Ulaanbaatar Mongolia",
+      image: "./1.jpg"
     },
     {
       id: 2,
       rating: 3.2,
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
-      author: "TukawAP",
-      location: "Kanzas, US",
-      image: "./itachi222.png"
+      text: "Ram ni chanartai goy, nemj shine zagwaraar ramaa soliulmaar baina  ",
+      author: "Амарбат",
+      location: "Ulaanbaatar, Mongolia",
+      image: "./2.jpg"
     },
     {
       id: 3,
       rating: 4.5,
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
-      author: "Ganjinsor",
-      location: "Usaarbaatar",
-      image: "./itachi222.png"
+      text: "Хүүхэн хараандаа тохируулж шилээ хийлгэснээс хойш толгой өвдөхөө больсондоо баярлалаа",
+      author: "Тэнгис",
+      location: "Ulaanbaatar, Mongolia",
+      image: "./3.jpg"
     },
     {
       id: 4,
       rating: 4.5,
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
-      author: "Ganjinsor",
-      location: "Usaarbaatar",
-      image: "./itachi222.png"
+      text: "Хараагаа мэддэг болохоор вебсайтаар нь маш амархан захиалсан. Ирсэн шил гоё таарч байна.",
+      author: "Маралмаа",
+      location: "Ulaanbaatar, Mongolia",
+      image: "./4.jpg"
     },
     {
       id: 5,
-      rating: 1,
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur velit molestiae similique mollitia porro magnam sunt ipsum a. Debitis eius, repellat iusto accusamus provident quod est veniam commodi sint nihil ipsam iste impedit beatae eaque nobis? Dicta sequi quasi quo.",
-      author: "Ganjinsor",
-      location: "Usaarbaatar",
-      image: "./itachi222.png"
+      rating: 4,
+      text: "Одоо хол байгаа зүйлийг уншдаг болсон хамар өвдөхгүй хөнгөхөн сайхан рамтай юм. UUuuooooaaaaiiiiioooo",
+      author: "Hoomiich Tulgaa",
+      location: "Ulaanbaatar",
+      image: "./5.jpg"
     },
     {
       id: 6,
-      rating: 3.2,
-      text: "jsadfisjfidsafdsjfjsd",
-      author: "TukawAP",
+      rating: 5,
+      text: "I lost my glasses during trip and they made me a new glasses on the spot. Better than my previous glasses fr.",
+      author: "Barry Allen",
       location: "Kanzas, US",
-      image: "./itachi222.png"
+      image: "./6.jpg"
     },
   ];
 

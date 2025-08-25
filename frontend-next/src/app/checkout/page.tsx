@@ -462,6 +462,30 @@ export default function CheckoutPage() {
               >
                 Test API Call
               </button>
+              <button
+                onClick={async () => {
+                  console.log('🧪 Debug: Testing debug callback API')
+                  try {
+                    const response = await fetch('/api/qpay/debug-callback?payment_id=DEBUG_TEST&test=mock')
+                    const result = await response.json()
+                    console.log('Debug callback result:', result)
+                    
+                    if (result.success) {
+                      setPaymentStatus('success')
+                      setOrderData({
+                        success: true,
+                        paymentId: result.orderId,
+                        message: 'Debug test successful!'
+                      })
+                    }
+                  } catch (error) {
+                    console.error('Debug callback test failed:', error)
+                  }
+                }}
+                className="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
+              >
+                Test Debug Callback
+              </button>
             </div>
           </div>
         )}

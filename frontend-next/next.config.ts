@@ -1,12 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'drive.google.com',
-        pathname: '/uc*', // Allow direct uc?export=view links
+        port: '',
+        pathname: '/uc', // Direct links: https://drive.google.com/uc?export=view&id=FILE_ID
       },
     ],
   },
@@ -16,4 +22,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-  

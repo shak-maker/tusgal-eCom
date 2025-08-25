@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       fontFamily:{
         Jakarta: ['Plus Jakarta Sans'],
-      }
+      },
     },
   },
   plugins: [

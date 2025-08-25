@@ -763,8 +763,27 @@ const GlassesAdminDashboard = () => {
 
             {/* Add/Edit Product Modal */}
             {showAddProduct && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <div
+                className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                onClick={() => {
+                  // Optional: Close modal when clicking outside
+                  setShowAddProduct(false);
+                  setEditingProduct(null);
+                  setNewProduct({
+                    name: "",
+                    price: "",
+                    description: "",
+                    imageUrl: "",
+                    stock: "",
+                    faceShape: "",
+                    categoryId: "",
+                  });
+                }}
+              >
+                <div
+                  className="bg-white bg-opacity-30 backdrop-blur-sm rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl"
+                  onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+                >
                   <h3 className="text-lg font-medium mb-4">
                     {editingProduct
                       ? "Барааны мэдээлэл өөрчлөх"
@@ -778,7 +797,8 @@ const GlassesAdminDashboard = () => {
                       onChange={(e) =>
                         setNewProduct({ ...newProduct, name: e.target.value })
                       }
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
                     />
                     <textarea
                       placeholder="Тайлбар"
@@ -789,7 +809,7 @@ const GlassesAdminDashboard = () => {
                           description: e.target.value,
                         })
                       }
-                      className="w-full p-2 border rounded-lg h-20"
+                      className="w-full p-2 border rounded-lg h-20 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <input
                       type="number"
@@ -798,7 +818,8 @@ const GlassesAdminDashboard = () => {
                       onChange={(e) =>
                         setNewProduct({ ...newProduct, price: e.target.value })
                       }
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
                     />
                     <div>
                       <input
@@ -811,7 +832,8 @@ const GlassesAdminDashboard = () => {
                             imageUrl: e.target.value,
                           })
                         }
-                        className="w-full p-2 border rounded-lg"
+                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required
                       />
                       {/* Google Drive URL guidance */}
                       <p className="text-xs text-gray-500 mt-1">
@@ -824,6 +846,7 @@ const GlassesAdminDashboard = () => {
                         3. Линкийг хуулж авна уу
                       </p>
                     </div>
+
                     {/* Image Preview */}
                     {newProduct.imageUrl && (
                       <div className="mt-4">
@@ -831,7 +854,7 @@ const GlassesAdminDashboard = () => {
                           Зургийн урьдчилан харах
                         </label>
                         <div
-                          className="border rounded-lg overflow-hidden bg-gray-100"
+                          className="border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center"
                           style={{ height: "200px" }}
                         >
                           <img
@@ -847,18 +870,19 @@ const GlassesAdminDashboard = () => {
                               );
                               target.style.display = "none";
                               target.parentElement!.innerHTML = `
-                                <div class="flex flex-col items-center justify-center h-full text-gray-500">
-                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                  </svg>
-                                  <span>Зураг ачааллагдах боломжгүй<br>Google Drive-д "Хэн бүхэн харж болно" гэж тохируулна уу</span>
-                                </div>
-                              `;
+                    <div class="flex flex-col items-center justify-center h-full text-gray-500 text-center px-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span class="text-sm">Зураг ачааллагдах боломжгүй<br>Google Drive-д 'Хэн бүхэн харж болно' гэж тохируулна уу</span>
+                    </div>
+                  `;
                             }}
                           />
                         </div>
                       </div>
                     )}
+
                     <input
                       type="number"
                       placeholder="Нийт ширхэг"
@@ -866,7 +890,7 @@ const GlassesAdminDashboard = () => {
                       onChange={(e) =>
                         setNewProduct({ ...newProduct, stock: e.target.value })
                       }
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <input
                       type="text"
@@ -878,7 +902,7 @@ const GlassesAdminDashboard = () => {
                           faceShape: e.target.value,
                         })
                       }
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <select
                       value={newProduct.categoryId}
@@ -888,7 +912,8 @@ const GlassesAdminDashboard = () => {
                           categoryId: e.target.value,
                         })
                       }
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
                     >
                       <option value="">Категори сонгох *</option>
                       {categories.map((category) => (
@@ -898,6 +923,7 @@ const GlassesAdminDashboard = () => {
                       ))}
                     </select>
                   </div>
+
                   <div className="flex justify-end space-x-2 mt-6">
                     <button
                       onClick={() => {
@@ -913,7 +939,7 @@ const GlassesAdminDashboard = () => {
                           categoryId: "",
                         });
                       }}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
                     >
                       Цуцлах
                     </button>
@@ -921,9 +947,9 @@ const GlassesAdminDashboard = () => {
                       onClick={
                         editingProduct ? handleUpdateProduct : handleAddProduct
                       }
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                     >
-                      {editingProduct ? "Update" : "Add"} Бараа
+                      {editingProduct ? "Шинэчлэх" : "Нэмэх"} Бараа
                     </button>
                   </div>
                 </div>
@@ -1027,7 +1053,7 @@ const GlassesAdminDashboard = () => {
 
             {/* Add/Edit Category Modal */}
             {showAddCategory && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg p-6 w-full max-w-md">
                   <h3 className="text-lg font-medium mb-4">
                     {editingCategory
@@ -1151,7 +1177,7 @@ const GlassesAdminDashboard = () => {
 
             {/* Order Details Modal */}
             {selectedOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg p-6 w-full max-w-lg">
                   <h3 className="text-lg font-medium mb-4">
                     Order Details - {selectedOrder.id}

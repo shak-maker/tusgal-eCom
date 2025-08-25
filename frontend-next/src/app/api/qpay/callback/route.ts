@@ -369,9 +369,21 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
     const qpayClient = new QPayClient(qpayConfig);
 
     // Use QPay client to check payment status
-    const payments = await qpayClient.checkPayment(invoiceId);
+    const response = await qpayClient.checkPayment(invoiceId);
 
-    console.log('QPay payment verification response:', JSON.stringify(payments, null, 2));
+    console.log('QPay payment verification response:', JSON.stringify(response, null, 2));
+
+    // Handle the actual QPay response structure
+    let payments: any[] = [];
+    if (response && typeof response === 'object') {
+      if (Array.isArray(response)) {
+        payments = response;
+      } else if ((response as any).rows && Array.isArray((response as any).rows)) {
+        payments = (response as any).rows;
+      } else if ((response as any).data && Array.isArray((response as any).data)) {
+        payments = (response as any).data;
+      }
+    }
 
     // Check if the payment is confirmed in QPay's system
     const confirmedPayment = payments.find((payment: any) => 
@@ -389,7 +401,7 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
       console.warn('⚠️ Payment not found or not confirmed in QPay API');
     }
 
-    return payments;
+    return response;
   } catch (error) {
     console.error('Error verifying payment with QPay API:', error);
     throw error;

@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQPay } from '@/lib/hooks/useQPay';
 import QRCode from 'qrcode';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loading } from '@/components/ui/loading';
 
 interface QPayPaymentProps {
   onPaymentSuccess?: (paymentData: any) => void;
@@ -44,6 +45,9 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string>('PENDING');
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
   const {
     createInvoice,
@@ -53,16 +57,93 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     clearError,
   } = useQPay(cartItems);
 
+  // Payment polling mechanism
+  const startPaymentPolling = useRef((invoiceId: string) => {
+    console.log('🔄 Starting payment polling for invoice:', invoiceId);
+    
+    const interval = setInterval(async () => {
+      try {
+        console.log('🔍 Checking payment status for invoice:', invoiceId);
+        
+        const response = await fetch(`/api/qpay/callback?invoice_id=${invoiceId}`);
+        const result = await response.json();
+        
+        console.log('📊 Payment status check result:', result);
+        
+        if (result.success) {
+          if (result.status === 'PAID' || result.qpayData?.some((payment: any) => payment.payment_status === 'PAID')) {
+            console.log('✅ Payment confirmed! Stopping polling.');
+            setPaymentStatus('PAID');
+            setPaymentProcessing(false);
+            
+            // Clear polling interval
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            
+            // Trigger payment success
+            if (onPaymentSuccess && paymentData) {
+              onPaymentSuccess({
+                ...paymentData,
+                paymentId: result.qpayData?.[0]?.payment_id || 'unknown',
+                status: 'PAID'
+              });
+            }
+          } else if (result.status === 'FAILED') {
+            console.log('❌ Payment failed! Stopping polling.');
+            setPaymentStatus('FAILED');
+            setPaymentProcessing(false);
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            
+            if (onPaymentError) {
+              onPaymentError('Payment failed');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error checking payment status:', error);
+      }
+    }, 3000); // Check every 3 seconds
+    
+    setPollingInterval(interval);
+  });
+
+  // Stop polling when component unmounts or payment is completed
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
+
+  // Start polling when payment options are shown
+  useEffect(() => {
+    if (showPaymentOptions && paymentData?.invoiceId && !pollingInterval) {
+      startPaymentPolling.current(paymentData.invoiceId);
+    }
+  }, [showPaymentOptions, paymentData?.invoiceId, pollingInterval]);
+
   // Use cartItems prop for total calculation
 
   // Handle payment success - only when payment is actually completed
   useEffect(() => {
-    if (paymentData && onPaymentSuccess) {
-      // Don't call onPaymentSuccess immediately when invoice is created
-      // Only call it when payment status is actually PAID
-      // This will be handled by the polling mechanism
+    if (paymentData && onPaymentSuccess && paymentStatus === 'PAID') {
+      // Payment success is now handled by the polling mechanism
     }
-  }, [paymentData, onPaymentSuccess]);
+  }, [paymentData, onPaymentSuccess, paymentStatus]);
+
+  // Start payment processing animation when QR code is shown
+  useEffect(() => {
+    if (showPaymentOptions && paymentData) {
+      setPaymentProcessing(true);
+    }
+  }, [showPaymentOptions, paymentData]);
 
   // Handle errors
   useEffect(() => {
@@ -213,6 +294,15 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const handleCancelPayment = () => {
     setShowPaymentOptions(false);
     setQrCodeDataUrl('');
+    setPaymentProcessing(false);
+    setPaymentStatus('PENDING');
+    
+    // Stop polling
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+    
     // Reset the component state
     clearError();
   };
@@ -419,8 +509,23 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                   <p>Нэхэмжлэлийн дугаар: <span className="font-mono">{paymentData.invoiceCode || 'Уншиж байна...'}</span></p>
                   <p>Дүн: <span className="font-semibold">₮{paymentData.amount ? paymentData.amount.toLocaleString() : cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0).toLocaleString()}</span></p>
                 </div>
+
+                {/* Payment Processing Animation */}
+                {paymentProcessing && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loading size="md" color="blue" text={`Төлбөр хүлээж байна... (${paymentStatus})`} />
+                      <p className="text-xs text-blue-600 text-center">
+                        QR кодыг уншуулсны дараа төлбөр автоматаар шалгагдана
+                      </p>
+                      <p className="text-xs text-gray-500 text-center">
+                        Төлбөрийн төлөв: {paymentStatus}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
-                {/* Debug button for testing */}
+                {/* Debug buttons for testing */}
                 <div className="mt-4 flex gap-2 justify-center">
                   <Button
                     onClick={() => {
@@ -431,6 +536,44 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                     size="sm"
                   >
                     QR Код Дахин Үүсгэх (Debug)
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      if (paymentData?.invoiceId) {
+                        console.log('Manual payment status check triggered');
+                        try {
+                          const response = await fetch(`/api/qpay/callback?invoice_id=${paymentData.invoiceId}`);
+                          const result = await response.json();
+                          console.log('Manual payment check result:', result);
+                          alert(`Payment status: ${JSON.stringify(result, null, 2)}`);
+                        } catch (error) {
+                          console.error('Manual payment check failed:', error);
+                          alert('Payment check failed');
+                        }
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Төлбөр Шалгах (Debug)
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      console.log('Testing callback endpoint accessibility');
+                      try {
+                        const response = await fetch('/api/qpay/callback?test=ping');
+                        const result = await response.json();
+                        console.log('Callback test result:', result);
+                        alert(`Callback test: ${JSON.stringify(result, null, 2)}`);
+                      } catch (error) {
+                        console.error('Callback test failed:', error);
+                        alert('Callback test failed');
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Callback Test (Debug)
                   </Button>
                 </div>
                 

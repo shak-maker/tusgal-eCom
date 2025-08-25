@@ -1,14 +1,115 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { QPayCallbackData } from '@/lib/qpay-types';
+import { prisma } from '@/lib/db';
+import { OrderStatus } from '@prisma/client';
+import { QPayClient } from '@/lib/qpay-client';
+import { getQPayConfig } from '@/lib/qpay-config';
+
+// Mock order status storage in memory
+const mockOrderStatus = new Map<string, string>();
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const paymentId = searchParams.get('payment_id');
+    const invoiceId = searchParams.get('invoice_id');
+    const test = searchParams.get('test');
+
+    console.log('🔍 GET request received with params:', { paymentId, invoiceId, test });
+
+    // Simple test endpoint - check this first
+    if (test === 'ping') {
+      console.log('🏓 Callback test ping received');
+      return NextResponse.json({
+        success: true,
+        message: 'Callback endpoint is accessible',
+        timestamp: new Date().toISOString(),
+        headers: Object.fromEntries(request.headers.entries())
+      });
+    }
+
+    // Only validate payment_id/invoice_id if not a test request
+    if (!paymentId && !invoiceId) {
+      console.log('❌ Missing payment_id or invoice_id parameter');
+      return NextResponse.json(
+        { error: 'Missing payment_id or invoice_id parameter' },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🔍 Payment status check via GET: paymentId=${paymentId}, invoiceId=${invoiceId}`);
+
+    // Check mock order status first
+    const orderId = invoiceId || paymentId;
+    const mockStatus = mockOrderStatus.get(orderId || '');
+    
+    if (mockStatus) {
+      console.log(`📋 Mock order status for ${orderId}: ${mockStatus}`);
+      return NextResponse.json({
+        success: true,
+        orderId,
+        status: mockStatus,
+        source: 'mock'
+      });
+    }
+
+    // If no mock status, check with QPay API
+    if (invoiceId) {
+      try {
+        console.log('🔍 Attempting to verify payment with QPay API for invoice:', invoiceId);
+        const qpayStatus = await verifyPaymentWithQPay(invoiceId, paymentId || '');
+        console.log('✅ QPay verification successful:', qpayStatus);
+        return NextResponse.json({
+          success: true,
+          orderId: invoiceId,
+          status: 'verified_with_qpay',
+          qpayData: qpayStatus,
+          source: 'qpay_api'
+        });
+      } catch (error) {
+        console.error('❌ Failed to check with QPay API:', error);
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : 'No stack trace',
+          invoiceId,
+          paymentId
+        });
+        return NextResponse.json({
+          success: false,
+          orderId: invoiceId,
+          error: 'Failed to verify with QPay API',
+          errorDetails: error instanceof Error ? error.message : 'Unknown error',
+          source: 'qpay_api_error'
+        });
+      }
+    }
+
+    return NextResponse.json({
+      success: false,
+      orderId,
+      error: 'No status found',
+      source: 'not_found'
+    });
+
+  } catch (error) {
+    console.error('Payment status check error:', error);
+    return NextResponse.json(
+      { error: 'Failed to check payment status' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 QPay callback POST received');
+    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
+    
     const body = await request.json();
     
     // Log the callback data for debugging
-    console.log('QPay callback received:', JSON.stringify(body, null, 2));
+    console.log('📥 QPay callback received:', JSON.stringify(body, null, 2));
 
-    // Extract payment information from callback using official QPay structure
+    // Parse JSON body from QPay
     const {
       payment_id,
       payment_date,
@@ -25,20 +126,32 @@ export async function POST(request: NextRequest) {
       object_id,
       invoice_id,
       sender_invoice_no,
-    } = body as QPayCallbackData;
+    } = body;
+
+    console.log('🔍 Parsed callback data:', {
+      payment_id,
+      payment_status,
+      payment_amount,
+      object_id,
+      invoice_id,
+      sender_invoice_no
+    });
 
     // Validate required fields based on QPay documentation
     if (!payment_id || !payment_status || !payment_amount || !object_id) {
-      console.error('QPay callback missing required fields:', body);
+      console.error('❌ QPay callback missing required fields:', body);
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
+    console.log('✅ Required fields validation passed');
+
     // Handle different payment statuses according to QPay documentation
     switch (payment_status) {
       case 'PAID':
+        console.log('💰 Processing PAID payment...');
         // Payment successful - update order status in your database
         await handleSuccessfulPayment({
           paymentId: payment_id,
@@ -59,6 +172,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'FAILED':
+        console.log('❌ Processing FAILED payment...');
         // Payment failed - update order status
         await handleFailedPayment({
           paymentId: payment_id,
@@ -71,6 +185,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'REFUNDED':
+        console.log('🔄 Processing REFUNDED payment...');
         // Payment refunded - update order status
         await handleRefundedPayment({
           paymentId: payment_id,
@@ -83,6 +198,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'NEW':
+        console.log('🆕 Processing NEW payment...');
         // Payment created but not yet processed
         await handleNewPayment({
           paymentId: payment_id,
@@ -95,13 +211,29 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.warn('Unknown QPay payment status:', payment_status);
+        console.warn('⚠️ Unknown QPay payment status:', payment_status);
     }
 
-    // Return success response to QPay (QPay expects a simple success response)
+    // Update mock order status in memory
+    const orderId = invoice_id || object_id || payment_id;
+    if (orderId) {
+      mockOrderStatus.set(orderId, payment_status);
+      console.log(`📝 Updated mock order status for ${orderId}: ${payment_status}`);
+    }
+
+    // Check payment status with QPay API for verification
+    try {
+      console.log('🔍 Verifying payment with QPay API...');
+      await verifyPaymentWithQPay(invoice_id || object_id, payment_id);
+    } catch (error) {
+      console.error('❌ Failed to verify payment with QPay:', error);
+    }
+
+    console.log('✅ QPay callback processed successfully');
+    // Respond with 200 OK
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('QPay callback processing error:', error);
+    console.error('❌ QPay callback processing error:', error);
     return NextResponse.json(
       { error: 'Failed to process callback' },
       { status: 500 }
@@ -136,8 +268,8 @@ async function handleSuccessfulPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update your order status in the database
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'PAID');
+    // Update order status in the database
+    await updateOrderStatus(data.invoiceId || data.objectId, 'PAID', data.paymentId);
     
     // TODO: Send confirmation email to customer
     // Example: await sendPaymentConfirmationEmail(data.paymentName, data.paymentAmount);
@@ -147,9 +279,6 @@ async function handleSuccessfulPayment(data: {
     
     // TODO: Log payment details for accounting
     // Example: await logPaymentDetails(data);
-    
-    // Note: Orders are now created in the frontend after successful payment
-    // This ensures the order appears in the admin panel
   } catch (error) {
     console.error('Error handling successful payment:', error);
   }
@@ -172,8 +301,8 @@ async function handleFailedPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update order status to failed
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'FAILED');
+    // Update order status to failed
+    await updateOrderStatus(data.invoiceId || data.objectId, 'FAILED', data.paymentId);
     
     // TODO: Send failure notification to customer
     // Example: await sendPaymentFailureEmail(data.senderInvoiceNo);
@@ -199,8 +328,8 @@ async function handleRefundedPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update order status to refunded
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'REFUNDED');
+    // Update order status to refunded
+    await updateOrderStatus(data.invoiceId || data.objectId, 'CANCELLED', data.paymentId);
     
     // TODO: Process refund logic (restore inventory, etc.)
     // Example: await processRefund(data.invoiceId || data.objectId);
@@ -229,12 +358,168 @@ async function handleNewPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update order status to pending
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'PENDING');
+    // Update order status to pending
+    await updateOrderStatus(data.invoiceId || data.objectId, 'PENDING', data.paymentId);
     
     // TODO: Send payment pending notification
     // Example: await sendPaymentPendingEmail(data.senderInvoiceNo);
   } catch (error) {
     console.error('Error handling new payment:', error);
+  }
+}
+
+// Verify payment with QPay API
+async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
+  try {
+    console.log(`🔍 Verifying payment with QPay API: invoiceId=${invoiceId}, paymentId=${paymentId}`);
+
+    // Initialize QPay client
+    const qpayConfig = getQPayConfig();
+    console.log('🔧 QPay config loaded:', {
+      merchantId: qpayConfig.merchantId,
+      baseUrl: qpayConfig.baseUrl,
+      invoiceCode: qpayConfig.invoiceCode
+    });
+    
+    const qpayClient = new QPayClient(qpayConfig);
+    console.log('🔧 QPay client initialized');
+
+    // Use QPay client to check payment status
+    console.log('📞 Calling QPay checkPayment...');
+    const response = await qpayClient.checkPayment(invoiceId);
+    console.log('📞 QPay checkPayment completed');
+
+    console.log('QPay payment verification response:', JSON.stringify(response, null, 2));
+
+    // Handle the actual QPay response structure
+    let payments: any[] = [];
+    if (response && typeof response === 'object') {
+      if (Array.isArray(response)) {
+        console.log('📊 Response is an array, using directly');
+        payments = response;
+      } else if ((response as any).rows && Array.isArray((response as any).rows)) {
+        console.log('📊 Response has rows array, using rows');
+        payments = (response as any).rows;
+      } else if ((response as any).data && Array.isArray((response as any).data)) {
+        console.log('📊 Response has data array, using data');
+        payments = (response as any).data;
+      } else {
+        console.log('📊 Response structure unknown, using empty array');
+        payments = [];
+      }
+    } else {
+      console.log('📊 Response is not an object, using empty array');
+      payments = [];
+    }
+
+    console.log('📊 Extracted payments:', payments);
+
+    // Check if the payment is confirmed in QPay's system
+    const confirmedPayment = payments.find((payment: any) => 
+      payment.payment_id === paymentId && payment.payment_status === 'PAID'
+    );
+
+    if (confirmedPayment) {
+      console.log('✅ Payment confirmed with QPay API:', {
+        paymentId: confirmedPayment.payment_id,
+        status: confirmedPayment.payment_status,
+        amount: confirmedPayment.payment_amount,
+        date: confirmedPayment.payment_date
+      });
+    } else {
+      console.warn('⚠️ Payment not found or not confirmed in QPay API');
+      console.warn('⚠️ Looking for paymentId:', paymentId);
+      console.warn('⚠️ Available payments:', payments.map(p => ({ id: p.payment_id, status: p.payment_status })));
+    }
+
+    return response;
+  } catch (error) {
+    console.error('❌ Error verifying payment with QPay API:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
+  }
+}
+
+// Update order status in database
+async function updateOrderStatus(orderId: string, status: OrderStatus, paymentId?: string) {
+  try {
+    console.log(`📝 Updating order status in database: orderId=${orderId}, status=${status}, paymentId=${paymentId}`);
+
+    const updateData: any = {
+      status: status,
+      paid: status === 'PAID',
+      updatedAt: new Date(),
+    };
+
+    // Add payment details if provided
+    if (paymentId) {
+      updateData.paymentId = paymentId;
+    }
+
+    console.log('🔍 Searching for order with criteria:', {
+      invoiceId: orderId,
+      orderId: orderId
+    });
+
+    // Try to find order by invoiceId first, then by orderId
+    const order = await prisma.order.findFirst({
+      where: {
+        OR: [
+          { invoiceId: orderId },
+          { id: orderId }
+        ]
+      }
+    });
+
+    console.log('🔍 Order search result:', order ? {
+      id: order.id,
+      invoiceId: order.invoiceId,
+      status: order.status,
+      paid: order.paid
+    } : 'No order found');
+
+    if (order) {
+      console.log('📝 Updating order with data:', updateData);
+      
+      const updatedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: updateData
+      });
+
+      console.log(`✅ Order status updated successfully:`, {
+        orderId: updatedOrder.id,
+        invoiceId: updatedOrder.invoiceId,
+        status: updatedOrder.status,
+        paid: updatedOrder.paid,
+        paymentId: updatedOrder.paymentId
+      });
+
+      return updatedOrder;
+    } else {
+      console.warn(`⚠️ Order not found for orderId: ${orderId}`);
+      
+      // Let's also search for any orders with similar invoiceId patterns
+      const similarOrders = await prisma.order.findMany({
+        where: {
+          OR: [
+            { invoiceId: { contains: orderId } },
+            { id: { contains: orderId } }
+          ]
+        },
+        select: {
+          id: true,
+          invoiceId: true,
+          status: true,
+          paid: true
+        }
+      });
+      
+      console.log('🔍 Similar orders found:', similarOrders);
+      
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Error updating order status:', error);
+    throw error;
   }
 }

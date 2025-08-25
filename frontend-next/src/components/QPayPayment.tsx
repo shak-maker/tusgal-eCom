@@ -160,10 +160,10 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
 
   // Start polling when payment options are shown
   useEffect(() => {
-    if (showPaymentOptions && paymentData?.invoiceId && !pollingInterval) {
+    if (showPaymentOptions && paymentData?.invoiceId && !pollingInterval && paymentStatus !== 'PAID') {
       startPaymentPolling.current(paymentData.invoiceId);
     }
-  }, [showPaymentOptions, paymentData?.invoiceId, pollingInterval]);
+  }, [showPaymentOptions, paymentData?.invoiceId, pollingInterval, paymentStatus]);
 
   // Use cartItems prop for total calculation
 

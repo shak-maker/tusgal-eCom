@@ -58,10 +58,29 @@ export async function GET(request: NextRequest) {
         console.log('🔍 Attempting to verify payment with QPay API for invoice:', invoiceId);
         const qpayStatus = await verifyPaymentWithQPay(invoiceId, paymentId || '');
         console.log('✅ QPay verification successful:', qpayStatus);
+        
+        // Extract payment status from QPay response
+        let paymentStatus = 'UNKNOWN';
+        let confirmedPayment = null;
+        
+        if (qpayStatus && typeof qpayStatus === 'object') {
+          const payments = (qpayStatus as any).rows || (qpayStatus as any).data || [];
+          if (paymentId && paymentId.trim() !== '') {
+            confirmedPayment = payments.find((p: any) => p.payment_id === paymentId);
+          } else {
+            confirmedPayment = payments.find((p: any) => p.payment_status === 'PAID');
+          }
+          
+          if (confirmedPayment) {
+            paymentStatus = confirmedPayment.payment_status;
+          }
+        }
+        
         return NextResponse.json({
           success: true,
           orderId: invoiceId,
-          status: 'verified_with_qpay',
+          status: paymentStatus,
+          paymentId: confirmedPayment?.payment_id,
           qpayData: qpayStatus,
           source: 'qpay_api'
         });
@@ -415,9 +434,19 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
     console.log('📊 Extracted payments:', payments);
 
     // Check if the payment is confirmed in QPay's system
-    const confirmedPayment = payments.find((payment: any) => 
-      payment.payment_id === paymentId && payment.payment_status === 'PAID'
-    );
+    let confirmedPayment: any = null;
+    
+    if (paymentId && paymentId.trim() !== '') {
+      // If paymentId is provided, look for that specific payment
+      confirmedPayment = payments.find((payment: any) => 
+        payment.payment_id === paymentId && payment.payment_status === 'PAID'
+      );
+    } else {
+      // If paymentId is empty, look for any PAID payment for this invoice
+      confirmedPayment = payments.find((payment: any) => 
+        payment.payment_status === 'PAID'
+      );
+    }
 
     if (confirmedPayment) {
       console.log('✅ Payment confirmed with QPay API:', {
@@ -428,7 +457,7 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
       });
     } else {
       console.warn('⚠️ Payment not found or not confirmed in QPay API');
-      console.warn('⚠️ Looking for paymentId:', paymentId);
+      console.warn('⚠️ Looking for paymentId:', paymentId || 'ANY PAID PAYMENT');
       console.warn('⚠️ Available payments:', payments.map(p => ({ id: p.payment_id, status: p.payment_status })));
     }
 

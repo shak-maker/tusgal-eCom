@@ -243,7 +243,18 @@ export async function POST(request: NextRequest) {
     // Check payment status with QPay API for verification
     try {
       console.log('🔍 Verifying payment with QPay API...');
-      await verifyPaymentWithQPay(invoice_id || object_id, payment_id);
+      const qpayResult = await verifyPaymentWithQPay(invoice_id || object_id, payment_id);
+      
+      // If payment is confirmed, create the order
+      if (qpayResult && typeof qpayResult === 'object') {
+        const payments = (qpayResult as any).rows || (qpayResult as any).data || [];
+        const confirmedPayment = payments.find((p: any) => p.payment_status === 'PAID');
+        
+        if (confirmedPayment) {
+          console.log('✅ Payment confirmed, creating order...');
+          await createOrderFromPayment(confirmedPayment, invoice_id || object_id);
+        }
+      }
     } catch (error) {
       console.error('❌ Failed to verify payment with QPay:', error);
     }
@@ -465,6 +476,54 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
   } catch (error) {
     console.error('❌ Error verifying payment with QPay API:', error);
     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
+  }
+}
+
+// Create order from payment data
+async function createOrderFromPayment(paymentData: any, invoiceId: string) {
+  try {
+    console.log('🛒 Creating order from payment data:', paymentData);
+    
+    // For now, we'll create a basic order with minimal data
+    // In a real implementation, you'd want to get the cart items and customer data
+    // from the invoice or from a session/database
+    
+    const orderData = {
+      items: [], // This should be populated with actual cart items
+      shippingAddress: 'Address from payment', // This should come from customer data
+      phone: 'Phone from payment', // This should come from customer data
+      email: 'email@example.com', // This should come from customer data
+      paymentId: paymentData.payment_id,
+      invoiceId: invoiceId,
+      status: 'PAID',
+      totalAmount: parseFloat(paymentData.payment_amount),
+      pdCm: null,
+      lensInfo: null
+    };
+    
+    console.log('📦 Order data to create:', orderData);
+    
+    // Call the create-order API
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/qpay/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData),
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('✅ Order created successfully:', result);
+      return result;
+    } else {
+      const error = await response.json();
+      console.error('❌ Failed to create order:', error);
+      throw new Error(`Failed to create order: ${error.error}`);
+    }
+  } catch (error) {
+    console.error('❌ Error creating order from payment:', error);
     throw error;
   }
 }

@@ -49,6 +49,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const [paymentStatus, setPaymentStatus] = useState<string>('PENDING');
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [pollingCount, setPollingCount] = useState(0);
+  const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>('');
   const MAX_POLLING_ATTEMPTS = 60; // 5 minutes (60 * 5 seconds)
 
   const {
@@ -103,6 +104,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             
             // Trigger payment success
             if (onPaymentSuccess && paymentData) {
+              setConfirmedPaymentId(result.paymentId || 'unknown');
               onPaymentSuccess({
                 ...paymentData,
                 paymentId: result.paymentId || 'unknown',
@@ -534,7 +536,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                 </div>
 
                 {/* Payment Processing Animation */}
-                {paymentProcessing && (
+                {paymentProcessing && paymentStatus !== 'PAID' && (
                   <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex flex-col items-center gap-3">
                       <Loading size="md" color="blue" text={`Төлбөр хүлээж байна... (${paymentStatus})`} />
@@ -543,6 +545,22 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                       </p>
                       <p className="text-xs text-gray-500 text-center">
                         Төлбөрийн төлөв: {paymentStatus}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Success Message */}
+                {paymentStatus === 'PAID' && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="text-3xl">✅</div>
+                      <h3 className="text-lg font-semibold text-green-800">Төлбөр амжилттай!</h3>
+                      <p className="text-sm text-green-700 text-center">
+                        Таны төлбөр амжилттай хүлээн авлаа. Захиалга баталгаажлаа.
+                      </p>
+                      <p className="text-xs text-green-600 text-center">
+                        Төлбөрийн дугаар: {confirmedPaymentId || 'Unknown'}
                       </p>
                     </div>
                   </div>

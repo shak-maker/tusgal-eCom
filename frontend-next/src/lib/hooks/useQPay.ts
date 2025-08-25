@@ -7,6 +7,7 @@ interface QPayPaymentData {
   status: string;
   qrCodeUrl: string;
   paymentUrl: string;
+  paymentId?: string; // Payment ID from QPay
   // QPay's built-in QR data
   qrText?: string;
   qrImage?: string;

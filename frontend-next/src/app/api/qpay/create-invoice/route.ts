@@ -39,15 +39,17 @@ export async function POST(request: NextRequest) {
 
     console.log('QPay invoice response:', JSON.stringify(invoice, null, 2));
 
+    console.log('QPay invoice response:', JSON.stringify(invoice, null, 2));
+    
     return NextResponse.json({
       success: true,
       data: {
-        invoiceId: invoice.invoice_id, // Fix: use invoice_id instead of id
-        invoiceCode: invoice.invoice_code,
+        invoiceId: invoice.invoice_id,
+        invoiceCode: invoice.invoice_code || invoice.sender_invoice_no, // Use invoice_code or fallback to sender_invoice_no
         amount: invoice.amount,
         status: invoice.status,
-        qrCodeUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/qr`, // Fix: use invoice_id
-        paymentUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/pay`, // Fix: use invoice_id
+        qrCodeUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/qr`,
+        paymentUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/pay`,
         // Use QPay's built-in QR data
         qrText: invoice.qr_text,
         qrImage: invoice.qr_image,

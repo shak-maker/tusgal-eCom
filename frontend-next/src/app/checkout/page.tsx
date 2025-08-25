@@ -891,6 +891,9 @@ export default function CheckoutPage() {
                             // Show success message only when payment is actually completed
                             alert('Төлбөр амжилттай! Таны захиалга баталгаажлаа.');
                             
+                            // Clear cart after successful order
+                            // You might want to add cart clearing logic here
+                            
                             // Optionally redirect to success page
                             // window.location.href = '/order-success';
                           } else {

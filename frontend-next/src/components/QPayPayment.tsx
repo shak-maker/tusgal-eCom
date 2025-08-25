@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loading } from '@/components/ui/loading';
 
 interface QPayPaymentProps {
   onPaymentSuccess?: (paymentData: any) => void;
@@ -44,6 +45,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   const {
     createInvoice,
@@ -63,6 +65,13 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
       // This will be handled by the polling mechanism
     }
   }, [paymentData, onPaymentSuccess]);
+
+  // Start payment processing animation when QR code is shown
+  useEffect(() => {
+    if (showPaymentOptions && paymentData) {
+      setPaymentProcessing(true);
+    }
+  }, [showPaymentOptions, paymentData]);
 
   // Handle errors
   useEffect(() => {
@@ -213,6 +222,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const handleCancelPayment = () => {
     setShowPaymentOptions(false);
     setQrCodeDataUrl('');
+    setPaymentProcessing(false);
     // Reset the component state
     clearError();
   };
@@ -419,6 +429,18 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                   <p>Нэхэмжлэлийн дугаар: <span className="font-mono">{paymentData.invoiceCode || 'Уншиж байна...'}</span></p>
                   <p>Дүн: <span className="font-semibold">₮{paymentData.amount ? paymentData.amount.toLocaleString() : cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0).toLocaleString()}</span></p>
                 </div>
+
+                {/* Payment Processing Animation */}
+                {paymentProcessing && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loading size="md" color="blue" text="Төлбөр хүлээж байна..." />
+                      <p className="text-xs text-blue-600 text-center">
+                        QR кодыг уншуулсны дараа төлбөр автоматаар шалгагдана
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Debug button for testing */}
                 <div className="mt-4 flex gap-2 justify-center">

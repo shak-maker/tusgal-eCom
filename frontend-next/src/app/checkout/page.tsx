@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { ArrowLeft, CreditCard, Truck, Shield } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { QPayPayment } from '@/components/QPayPayment'
+import { Loading } from '@/components/ui/loading'
 import { useUserPreferencesStore } from '@/lib/userPreferencesStore'
 import { useOrderExtrasStore } from '@/lib/orderExtrasStore'
 
@@ -52,6 +53,8 @@ export default function CheckoutPage() {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
   const [orderData, setOrderData] = useState<any>(null)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   useEffect(() => {
     async function fetchCart() {
@@ -76,6 +79,7 @@ export default function CheckoutPage() {
     
     if (paymentId) {
       console.log('Payment callback received with payment_id:', paymentId)
+      setPaymentStatus('loading')
       
       // Check payment status with QPay
       checkPaymentStatus(paymentId)
@@ -86,16 +90,40 @@ export default function CheckoutPage() {
     try {
       console.log('Checking payment status for:', paymentId)
       
-      // You can implement payment status checking here
-      // For now, just show a success message
-      setOrderData({
-        success: true,
-        paymentId: paymentId,
-        message: 'Төлбөр амжилттай! Таны захиалга баталгаажлаа.'
-      })
+      // Check payment status using the callback URL
+      const response = await fetch(`/api/qpay/callback?payment_id=${paymentId}`)
+      const result = await response.json()
+      
+      console.log('Payment status check result:', result)
+      
+      if (result.success) {
+        if (result.status === 'PAID' || result.source === 'qpay_api') {
+          setPaymentStatus('success')
+          setOrderData({
+            success: true,
+            paymentId: paymentId,
+            message: 'Төлбөр амжилттай! Таны захиалга баталгаажлаа.'
+          })
+        } else {
+          setPaymentStatus('error')
+          setOrderData({
+            success: false,
+            paymentId: paymentId,
+            message: `Төлбөрийн төлөв: ${result.status || 'Тодорхойгүй'}`
+          })
+        }
+      } else {
+        setPaymentStatus('error')
+        setOrderData({
+          success: false,
+          paymentId: paymentId,
+          message: 'Төлбөр шалгахад алдаа гарлаа.'
+        })
+      }
       
     } catch (error) {
       console.error('Error checking payment status:', error)
+      setPaymentStatus('error')
       setOrderData({
         success: false,
         paymentId: paymentId,
@@ -245,29 +273,74 @@ export default function CheckoutPage() {
           <h1 className="text-3xl font-bold text-gray-900">Төлбөрөө төлөх</h1>
         </div>
 
-        {/* Payment Success Message */}
-        {orderData && (
+        {/* Payment Status Display */}
+        {paymentStatus !== 'idle' && (
           <div className="mb-6">
-            <div className={`p-4 rounded-lg border ${
-              orderData.success 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
-              <div className="flex items-center gap-3">
-                <div className={`text-2xl ${orderData.success ? 'text-green-600' : 'text-red-600'}`}>
-                  {orderData.success ? '✅' : '❌'}
-                </div>
-                <div>
-                  <h3 className="font-semibold">
-                    {orderData.success ? 'Төлбөр амжилттай!' : 'Төлбөр амжилтгүй!'}
-                  </h3>
-                  <p className="text-sm mt-1">{orderData.message}</p>
-                  {orderData.paymentId && (
-                    <p className="text-xs mt-1 opacity-75">Төлбөрийн ID: {orderData.paymentId}</p>
-                  )}
+            {paymentStatus === 'loading' && (
+              <div className="p-6 rounded-lg border border-blue-200 bg-blue-50">
+                <div className="flex items-center gap-4">
+                  <Loading size="lg" color="blue" />
+                  <div>
+                    <h3 className="font-semibold text-blue-800">Төлбөр шалгаж байна...</h3>
+                    <p className="text-sm text-blue-600 mt-1">QPay-аас төлбөрийн мэдээлэл авч байна</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {paymentStatus === 'success' && orderData && (
+              <div className="p-6 rounded-lg border border-green-200 bg-green-50">
+                <div className="flex items-center gap-4">
+                  <div className="text-3xl animate-bounce">✅</div>
+                  <div>
+                    <h3 className="font-semibold text-green-800">Төлбөр амжилттай!</h3>
+                    <p className="text-sm text-green-600 mt-1">{orderData.message}</p>
+                    {orderData.paymentId && (
+                      <p className="text-xs mt-1 opacity-75">Төлбөрийн ID: {orderData.paymentId}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-white rounded border border-green-200">
+                  <div className="flex items-center gap-2 text-green-700">
+                    <Shield className="w-4 h-4" />
+                    <span className="text-sm font-medium">Таны захиалга баталгаажлаа</span>
+                  </div>
+                  <p className="text-xs text-green-600 mt-1">
+                    Захиалгын мэдээллийг имэйл хаягаар илгээх болно
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {paymentStatus === 'error' && orderData && (
+              <div className="p-6 rounded-lg border border-red-200 bg-red-50">
+                <div className="flex items-center gap-4">
+                  <div className="text-3xl">❌</div>
+                  <div>
+                    <h3 className="font-semibold text-red-800">Төлбөр амжилтгүй!</h3>
+                    <p className="text-sm text-red-600 mt-1">{orderData.message}</p>
+                    {orderData.paymentId && (
+                      <p className="text-xs mt-1 opacity-75">Төлбөрийн ID: {orderData.paymentId}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => {
+                      setPaymentStatus('idle')
+                      setOrderData(null)
+                      // Remove payment_id from URL
+                      const url = new URL(window.location.href)
+                      url.searchParams.delete('payment_id')
+                      window.history.replaceState({}, '', url.toString())
+                    }}
+                    className="text-sm text-red-600 hover:text-red-700 underline"
+                  >
+                    Дахин оролдох
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

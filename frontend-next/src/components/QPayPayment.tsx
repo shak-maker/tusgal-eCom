@@ -48,6 +48,8 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<string>('PENDING');
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [pollingCount, setPollingCount] = useState(0);
+  const MAX_POLLING_ATTEMPTS = 60; // 5 minutes (60 * 5 seconds)
 
   const {
     createInvoice,
@@ -60,10 +62,25 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   // Payment polling mechanism
   const startPaymentPolling = useRef((invoiceId: string) => {
     console.log('🔄 Starting payment polling for invoice:', invoiceId);
+    setPollingCount(0);
     
     const interval = setInterval(async () => {
       try {
-        console.log('🔍 Checking payment status for invoice:', invoiceId);
+        setPollingCount(prev => prev + 1);
+        console.log(`🔍 Checking payment status for invoice: ${invoiceId} (attempt ${pollingCount + 1}/${MAX_POLLING_ATTEMPTS})`);
+        
+        // Check if we've exceeded max polling attempts
+        if (pollingCount >= MAX_POLLING_ATTEMPTS) {
+          console.log('⏰ Max polling attempts reached, stopping polling');
+          clearInterval(interval);
+          setPollingInterval(null);
+          setPaymentProcessing(false);
+          setPaymentStatus('TIMEOUT');
+          if (onPaymentError) {
+            onPaymentError('Payment timeout - please try again');
+          }
+          return;
+        }
         
         const response = await fetch(`/api/qpay/callback?invoice_id=${invoiceId}`);
         const result = await response.json();
@@ -71,7 +88,9 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
         console.log('📊 Payment status check result:', result);
         
         if (result.success) {
-          if (result.status === 'PAID' || result.qpayData?.some((payment: any) => payment.payment_status === 'PAID')) {
+          console.log('🔍 Checking payment status:', result.status);
+          
+          if (result.status === 'PAID') {
             console.log('✅ Payment confirmed! Stopping polling.');
             setPaymentStatus('PAID');
             setPaymentProcessing(false);
@@ -86,7 +105,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             if (onPaymentSuccess && paymentData) {
               onPaymentSuccess({
                 ...paymentData,
-                paymentId: result.qpayData?.[0]?.payment_id || 'unknown',
+                paymentId: result.paymentId || 'unknown',
                 status: 'PAID'
               });
             }
@@ -103,12 +122,16 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             if (onPaymentError) {
               onPaymentError('Payment failed');
             }
+          } else {
+            console.log('⏳ Payment still pending, status:', result.status);
           }
+        } else {
+          console.log('❌ Payment check failed:', result.error);
         }
       } catch (error) {
         console.error('❌ Error checking payment status:', error);
       }
-    }, 3000); // Check every 3 seconds
+    }, 5000); // Check every 5 seconds
     
     setPollingInterval(interval);
   });

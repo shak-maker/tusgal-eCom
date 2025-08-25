@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { prisma } from '@/lib/db';
+import { OrderStatus } from '@prisma/client';
 
 // Mock order status storage in memory
 const mockOrderStatus = new Map<string, string>();
@@ -220,8 +222,8 @@ async function handleSuccessfulPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update your order status in the database
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'PAID');
+    // Update order status in the database
+    await updateOrderStatus(data.invoiceId || data.objectId, 'PAID', data.paymentId);
     
     // TODO: Send confirmation email to customer
     // Example: await sendPaymentConfirmationEmail(data.paymentName, data.paymentAmount);
@@ -231,9 +233,6 @@ async function handleSuccessfulPayment(data: {
     
     // TODO: Log payment details for accounting
     // Example: await logPaymentDetails(data);
-    
-    // Note: Orders are now created in the frontend after successful payment
-    // This ensures the order appears in the admin panel
   } catch (error) {
     console.error('Error handling successful payment:', error);
   }
@@ -256,8 +255,8 @@ async function handleFailedPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update order status to failed
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'FAILED');
+    // Update order status to failed
+    await updateOrderStatus(data.invoiceId || data.objectId, 'FAILED', data.paymentId);
     
     // TODO: Send failure notification to customer
     // Example: await sendPaymentFailureEmail(data.senderInvoiceNo);
@@ -283,8 +282,8 @@ async function handleRefundedPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update order status to refunded
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'REFUNDED');
+    // Update order status to refunded
+    await updateOrderStatus(data.invoiceId || data.objectId, 'CANCELLED', data.paymentId);
     
     // TODO: Process refund logic (restore inventory, etc.)
     // Example: await processRefund(data.invoiceId || data.objectId);
@@ -313,8 +312,8 @@ async function handleNewPayment(data: {
       invoiceId: data.invoiceId,
     });
 
-    // TODO: Update order status to pending
-    // Example: await updateOrderStatus(data.invoiceId || data.objectId, 'PENDING');
+    // Update order status to pending
+    await updateOrderStatus(data.invoiceId || data.objectId, 'PENDING', data.paymentId);
     
     // TODO: Send payment pending notification
     // Example: await sendPaymentPendingEmail(data.senderInvoiceNo);
@@ -383,6 +382,56 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
     return response.data;
   } catch (error) {
     console.error('Error verifying payment with QPay API:', error);
+    throw error;
+  }
+}
+
+// Update order status in database
+async function updateOrderStatus(orderId: string, status: OrderStatus, paymentId?: string) {
+  try {
+    console.log(`📝 Updating order status in database: orderId=${orderId}, status=${status}, paymentId=${paymentId}`);
+
+    const updateData: any = {
+      status: status,
+      paid: status === 'PAID',
+      updatedAt: new Date(),
+    };
+
+    // Add payment details if provided
+    if (paymentId) {
+      updateData.paymentId = paymentId;
+    }
+
+    // Try to find order by invoiceId first, then by orderId
+    const order = await prisma.order.findFirst({
+      where: {
+        OR: [
+          { invoiceId: orderId },
+          { id: orderId }
+        ]
+      }
+    });
+
+    if (order) {
+      const updatedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: updateData
+      });
+
+      console.log(`✅ Order status updated successfully:`, {
+        orderId: updatedOrder.id,
+        status: updatedOrder.status,
+        paid: updatedOrder.paid,
+        paymentId: updatedOrder.paymentId
+      });
+
+      return updatedOrder;
+    } else {
+      console.warn(`⚠️ Order not found for orderId: ${orderId}`);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error updating order status:', error);
     throw error;
   }
 }

@@ -51,6 +51,9 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
   const [pollingCount, setPollingCount] = useState(0);
   const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>('');
   const MAX_POLLING_ATTEMPTS = 60; // 5 minutes (60 * 5 seconds)
+  
+  // Use ref to track current interval for proper cleanup
+  const currentIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     createInvoice,
@@ -65,6 +68,11 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     console.log('🔄 Starting payment polling for invoice:', invoiceId);
     setPollingCount(0);
     
+    // Clear any existing interval first
+    if (currentIntervalRef.current) {
+      clearInterval(currentIntervalRef.current);
+    }
+    
     const interval = setInterval(async () => {
       try {
         setPollingCount(prev => prev + 1);
@@ -74,6 +82,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
         if (pollingCount >= MAX_POLLING_ATTEMPTS) {
           console.log('⏰ Max polling attempts reached, stopping polling');
           clearInterval(interval);
+          currentIntervalRef.current = null;
           setPollingInterval(null);
           setPaymentProcessing(false);
           setPaymentStatus('TIMEOUT');
@@ -96,11 +105,10 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             setPaymentStatus('PAID');
             setPaymentProcessing(false);
             
-            // Clear polling interval
-            if (pollingInterval) {
-              clearInterval(pollingInterval);
-              setPollingInterval(null);
-            }
+            // Clear polling interval using the current interval reference
+            clearInterval(interval);
+            currentIntervalRef.current = null;
+            setPollingInterval(null);
             
             // Trigger payment success
             if (onPaymentSuccess && paymentData) {
@@ -116,10 +124,10 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
             setPaymentStatus('FAILED');
             setPaymentProcessing(false);
             
-            if (pollingInterval) {
-              clearInterval(pollingInterval);
-              setPollingInterval(null);
-            }
+            // Clear polling interval using the current interval reference
+            clearInterval(interval);
+            currentIntervalRef.current = null;
+            setPollingInterval(null);
             
             if (onPaymentError) {
               onPaymentError('Payment failed');
@@ -135,17 +143,20 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
       }
     }, 5000); // Check every 5 seconds
     
+    // Store the interval reference
+    currentIntervalRef.current = interval;
     setPollingInterval(interval);
   });
 
   // Stop polling when component unmounts or payment is completed
   useEffect(() => {
     return () => {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
+      if (currentIntervalRef.current) {
+        clearInterval(currentIntervalRef.current);
+        currentIntervalRef.current = null;
       }
     };
-  }, [pollingInterval]);
+  }, []);
 
   // Start polling when payment options are shown
   useEffect(() => {

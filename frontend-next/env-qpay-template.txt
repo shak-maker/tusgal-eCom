@@ -8,7 +8,7 @@ NEXT_PUBLIC_QPAY_PASSWORD=h1H1Wq4S
 
 # QPay API URLs
 NEXT_PUBLIC_QPAY_BASE_URL=https://merchant.qpay.mn
-NEXT_PUBLIC_QPAY_CALLBACK_URL=https://yourdomain.com/api/qpay/callback
+NEXT_PUBLIC_QPAY_CALLBACK_URL=http://tusgal.shop/api/qpay/callback
 
 # QPay Invoice Code (provided by QPay)
 NEXT_PUBLIC_QPAY_INVOICE_CODE=TUSGAL_OPTIC_INVOICE

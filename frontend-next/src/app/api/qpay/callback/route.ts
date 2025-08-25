@@ -55,7 +55,9 @@ export async function GET(request: NextRequest) {
     // If no mock status, check with QPay API
     if (invoiceId) {
       try {
+        console.log('🔍 Attempting to verify payment with QPay API for invoice:', invoiceId);
         const qpayStatus = await verifyPaymentWithQPay(invoiceId, paymentId || '');
+        console.log('✅ QPay verification successful:', qpayStatus);
         return NextResponse.json({
           success: true,
           orderId: invoiceId,
@@ -64,11 +66,18 @@ export async function GET(request: NextRequest) {
           source: 'qpay_api'
         });
       } catch (error) {
-        console.error('Failed to check with QPay API:', error);
+        console.error('❌ Failed to check with QPay API:', error);
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : 'No stack trace',
+          invoiceId,
+          paymentId
+        });
         return NextResponse.json({
           success: false,
           orderId: invoiceId,
           error: 'Failed to verify with QPay API',
+          errorDetails: error instanceof Error ? error.message : 'Unknown error',
           source: 'qpay_api_error'
         });
       }
@@ -366,10 +375,19 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
 
     // Initialize QPay client
     const qpayConfig = getQPayConfig();
+    console.log('🔧 QPay config loaded:', {
+      merchantId: qpayConfig.merchantId,
+      baseUrl: qpayConfig.baseUrl,
+      invoiceCode: qpayConfig.invoiceCode
+    });
+    
     const qpayClient = new QPayClient(qpayConfig);
+    console.log('🔧 QPay client initialized');
 
     // Use QPay client to check payment status
+    console.log('📞 Calling QPay checkPayment...');
     const response = await qpayClient.checkPayment(invoiceId);
+    console.log('📞 QPay checkPayment completed');
 
     console.log('QPay payment verification response:', JSON.stringify(response, null, 2));
 
@@ -377,13 +395,24 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
     let payments: any[] = [];
     if (response && typeof response === 'object') {
       if (Array.isArray(response)) {
+        console.log('📊 Response is an array, using directly');
         payments = response;
       } else if ((response as any).rows && Array.isArray((response as any).rows)) {
+        console.log('📊 Response has rows array, using rows');
         payments = (response as any).rows;
       } else if ((response as any).data && Array.isArray((response as any).data)) {
+        console.log('📊 Response has data array, using data');
         payments = (response as any).data;
+      } else {
+        console.log('📊 Response structure unknown, using empty array');
+        payments = [];
       }
+    } else {
+      console.log('📊 Response is not an object, using empty array');
+      payments = [];
     }
+
+    console.log('📊 Extracted payments:', payments);
 
     // Check if the payment is confirmed in QPay's system
     const confirmedPayment = payments.find((payment: any) => 
@@ -399,11 +428,14 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
       });
     } else {
       console.warn('⚠️ Payment not found or not confirmed in QPay API');
+      console.warn('⚠️ Looking for paymentId:', paymentId);
+      console.warn('⚠️ Available payments:', payments.map(p => ({ id: p.payment_id, status: p.payment_status })));
     }
 
     return response;
   } catch (error) {
-    console.error('Error verifying payment with QPay API:', error);
+    console.error('❌ Error verifying payment with QPay API:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     throw error;
   }
 }

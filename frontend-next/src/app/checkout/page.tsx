@@ -73,33 +73,39 @@ export default function CheckoutPage() {
     fetchCart()
   }, [])
 
-  // Handle QPay payment callback
+  // Check for payment callback from QPay
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const paymentId = urlParams.get('payment_id')
+    const { searchParams } = new URL(window.location.href);
+    const paymentId = searchParams.get('payment_id') || searchParams.get('qpay_payment_id');
     
     if (paymentId) {
-      console.log('🎯 Payment callback received with payment_id:', paymentId)
-      setPaymentStatus('loading')
+      console.log('🎯 Payment callback received with payment_id:', paymentId);
+      setPaymentStatus('loading');
       
       // Check payment status with QPay
-      checkPaymentStatus(paymentId)
+      checkPaymentStatus(paymentId);
       
       // Fallback: If payment status check takes too long, assume success
       // This handles cases where QPay callback is delayed
       const fallbackTimer = setTimeout(() => {
-        console.log('⏰ Fallback timer triggered - assuming payment success')
-        setPaymentStatus('success')
+        console.log('⏰ Fallback timer triggered - assuming payment success');
+        setPaymentStatus('success');
         setOrderData({
           success: true,
           paymentId: paymentId,
           message: 'Төлбөр амжилттай! Таны захиалга баталгаажлаа.'
-        })
-      }, 10000) // 10 seconds fallback
+        });
+      }, 10000); // 10 seconds fallback
       
-      return () => clearTimeout(fallbackTimer)
+      // Clean up URL after processing
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment_id');
+      url.searchParams.delete('qpay_payment_id');
+      window.history.replaceState({}, '', url.toString());
+      
+      return () => clearTimeout(fallbackTimer);
     }
-  }, [])
+  }, []);
 
   const checkPaymentStatus = async (paymentId: string) => {
     try {

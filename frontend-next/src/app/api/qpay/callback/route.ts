@@ -74,6 +74,21 @@ export async function GET(request: NextRequest) {
           
           if (confirmedPayment) {
             paymentStatus = confirmedPayment.payment_status;
+            
+            // If payment is confirmed, create the order
+            if (paymentStatus === 'PAID') {
+              console.log('✅ Payment confirmed via GET, creating order...');
+              try {
+                const result = await createOrderFromPayment(confirmedPayment, invoiceId);
+                if (result) {
+                  console.log('✅ Order creation completed successfully via GET');
+                } else {
+                  console.log('⚠️ Order creation returned null via GET - no stored invoice data');
+                }
+              } catch (orderError) {
+                console.error('❌ Error creating order via GET:', orderError);
+              }
+            }
           }
         }
         

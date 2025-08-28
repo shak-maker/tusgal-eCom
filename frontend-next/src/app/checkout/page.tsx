@@ -408,40 +408,6 @@ export default function CheckoutPage() {
         )}
 
 
-                        success: false,
-                        paymentId: result.paymentId,
-                        message: result.message
-                      })
-                    }
-                  } catch (error) {
-                    console.error('Real payment test failed:', error)
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
-              >
-                Test Real Payment
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🧪 Debug: Simulating QPay redirect with payment_id')
-                  const testPaymentId = 'QPAY_REDIRECT_' + Date.now()
-                  const testUrl = `/checkout?payment_id=${testPaymentId}`
-                  console.log('Simulating redirect to:', testUrl)
-                  
-                  // Simulate the URL change that QPay would make
-                  window.history.pushState({}, '', testUrl)
-                  
-                  // Trigger the useEffect that handles payment_id
-                  setPaymentStatus('loading')
-                  checkPaymentStatus(testPaymentId)
-                }}
-                className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-              >
-                Simulate QPay Redirect
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}

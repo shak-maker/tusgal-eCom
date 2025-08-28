@@ -253,7 +253,16 @@ export async function POST(request: NextRequest) {
         
         if (confirmedPayment) {
           console.log('✅ Payment confirmed, creating order...');
-          await createOrderFromPayment(confirmedPayment, invoice_id || object_id);
+          try {
+            const result = await createOrderFromPayment(confirmedPayment, invoice_id || object_id);
+            if (result) {
+              console.log('✅ Order creation completed successfully');
+            } else {
+              console.log('⚠️ Order creation returned null - no stored invoice data');
+            }
+          } catch (orderError) {
+            console.error('❌ Error creating order:', orderError);
+          }
         }
       }
     } catch (error) {
@@ -493,39 +502,8 @@ async function createOrderFromPayment(paymentData: any, invoiceId: string) {
     
     if (!storedInvoiceData) {
       console.warn('⚠️ No stored invoice data found for:', invoiceId);
-      // Fallback to basic order creation
-      const orderData = {
-        items: [],
-        shippingAddress: 'Address not available',
-        phone: 'Phone not available',
-        email: 'email@example.com',
-        paymentId: paymentData.payment_id,
-        invoiceId: invoiceId,
-        status: 'PAID',
-        totalAmount: parseFloat(paymentData.payment_amount),
-        pdCm: null,
-        lensInfo: null
-      };
-      
-      console.log('📦 Using fallback order data:', orderData);
-      
-      const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/qpay/create-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Order created successfully (fallback):', result);
-        return result;
-      } else {
-        const error = await response.json();
-        console.error('❌ Failed to create order:', error);
-        throw new Error(`Failed to create order: ${error.error}`);
-      }
+      console.log('🔍 Available invoice IDs in storage:', Array.from(invoiceDataStorage.keys()));
+      return null;
     }
     
     // Use stored invoice data to create complete order
@@ -556,7 +534,7 @@ async function createOrderFromPayment(paymentData: any, invoiceId: string) {
     
     console.log('📦 Complete order data to create:', orderData);
     
-    // Call the create-order API
+    // Call the create-order API directly
     const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/qpay/create-order`, {
       method: 'POST',
       headers: {

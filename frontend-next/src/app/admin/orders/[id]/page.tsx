@@ -47,6 +47,8 @@ export default function AdminOrderDetailPage() {
 	const updateOrderStatus = async (newStatus: string) => {
 		try {
 			setUpdating(true)
+			console.log('🔄 Updating order status:', { orderId: order.id, newStatus })
+			
 			const response = await fetch(`/api/admin/orders/${order.id}`, {
 				method: 'PUT',
 				headers: {
@@ -55,14 +57,20 @@ export default function AdminOrderDetailPage() {
 				body: JSON.stringify({ status: newStatus }),
 			})
 
+			console.log('📡 Response status:', response.status)
+			
 			if (response.ok) {
 				const updatedOrder = await response.json()
+				console.log('✅ Order updated successfully:', updatedOrder)
 				setOrder(updatedOrder)
 			} else {
-				console.error('Failed to update order status')
+				const errorData = await response.json().catch(() => ({}))
+				console.error('❌ Failed to update order status:', errorData)
+				alert(`Failed to update order status: ${errorData.error || 'Unknown error'}`)
 			}
 		} catch (error) {
-			console.error('Error updating order status:', error)
+			console.error('💥 Error updating order status:', error)
+			alert(`Error updating order status: ${error}`)
 		} finally {
 			setUpdating(false)
 		}

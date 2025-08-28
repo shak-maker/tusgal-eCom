@@ -46,23 +46,33 @@ export async function PUT(
     const body = await req.json();
     const { status, paid, shippingAddress, phone, email } = body;
 
+    console.log('🔄 Admin order update request:', { id, body });
+
     // Check if order exists
     const existingOrder = await prisma.order.findUnique({
       where: { id }
     });
 
     if (!existingOrder) {
+      console.log('❌ Order not found:', id);
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
+
+    console.log('📋 Current order status:', existingOrder.status);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     
-    if (status) updateData.status = status;
+    if (status) {
+      updateData.status = status;
+      console.log('🔄 Updating status from', existingOrder.status, 'to', status);
+    }
     if (typeof paid === 'boolean') updateData.paid = paid;
     if (shippingAddress) updateData.shippingAddress = shippingAddress;
     if (phone) updateData.phone = phone;
     if (email) updateData.email = email;
+
+    console.log('📝 Update data:', updateData);
 
     const updatedOrder = await prisma.order.update({
       where: { id },
@@ -81,9 +91,10 @@ export async function PUT(
       }
     });
 
+    console.log('✅ Order updated successfully:', { id, newStatus: updatedOrder.status });
     return NextResponse.json(updatedOrder);
   } catch (error) {
-    console.error('Error updating order:', error);
+    console.error('💥 Error updating order:', error);
     return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
   }
 }

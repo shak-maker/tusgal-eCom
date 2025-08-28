@@ -55,7 +55,7 @@ export default function CheckoutPage() {
   const [orderData, setOrderData] = useState<any>(null)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [debugMode, setDebugMode] = useState(false)
+
 
   useEffect(() => {
     async function fetchCart() {
@@ -304,15 +304,7 @@ export default function CheckoutPage() {
           <h1 className="text-3xl font-bold text-gray-900">Төлбөрөө төлөх</h1>
         </div>
 
-        {/* Debug Mode Toggle */}
-        <div className="mb-4">
-          <button
-            onClick={() => setDebugMode(!debugMode)}
-            className="text-xs text-gray-500 hover:text-gray-700 underline"
-          >
-            {debugMode ? '🔒 Debug Mode: OFF' : '🔓 Debug Mode: ON'}
-          </button>
-        </div>
+
 
         {/* Payment Status Display */}
         {paymentStatus !== 'idle' && (
@@ -415,101 +407,7 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Debug Mode Controls */}
-        {debugMode && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h4 className="font-medium text-yellow-800 mb-2">Debug Controls</h4>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => {
-                  console.log('🧪 Debug: Simulating loading state')
-                  setPaymentStatus('loading')
-                  setOrderData(null)
-                }}
-                className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-              >
-                Test Loading
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🧪 Debug: Simulating success state')
-                  setPaymentStatus('success')
-                  setOrderData({
-                    success: true,
-                    paymentId: 'DEBUG_SUCCESS',
-                    message: 'Төлбөр амжилттай! Таны захиалга баталгаажлаа.'
-                  })
-                }}
-                className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
-              >
-                Test Success
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🧪 Debug: Simulating error state')
-                  setPaymentStatus('error')
-                  setOrderData({
-                    success: false,
-                    paymentId: 'DEBUG_ERROR',
-                    message: 'Төлбөр амжилтгүй болсон.'
-                  })
-                }}
-                className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
-              >
-                Test Error
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🧪 Debug: Testing callback API')
-                  const testPaymentId = 'TEST_PAYMENT_' + Date.now()
-                  checkPaymentStatus(testPaymentId)
-                }}
-                className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-              >
-                Test API Call
-              </button>
-              <button
-                onClick={async () => {
-                  console.log('🧪 Debug: Testing debug callback API')
-                  try {
-                    const response = await fetch('/api/qpay/debug-callback?payment_id=DEBUG_TEST&test=mock')
-                    const result = await response.json()
-                    console.log('Debug callback result:', result)
-                    
-                    if (result.success) {
-                      setPaymentStatus('success')
-                      setOrderData({
-                        success: true,
-                        paymentId: result.orderId,
-                        message: 'Debug test successful!'
-                      })
-                    }
-                  } catch (error) {
-                    console.error('Debug callback test failed:', error)
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
-              >
-                Test Debug Callback
-              </button>
-              <button
-                onClick={async () => {
-                  console.log('🧪 Debug: Testing real payment flow')
-                  try {
-                    const response = await fetch('/api/qpay/test-real-payment?type=success')
-                    const result = await response.json()
-                    console.log('Real payment test result:', result)
-                    
-                    if (result.success) {
-                      setPaymentStatus('success')
-                      setOrderData({
-                        success: true,
-                        paymentId: result.paymentId,
-                        message: result.message
-                      })
-                    } else {
-                      setPaymentStatus('error')
-                      setOrderData({
+
                         success: false,
                         paymentId: result.paymentId,
                         message: result.message

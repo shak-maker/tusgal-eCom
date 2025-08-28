@@ -535,7 +535,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                       <div className="text-center text-gray-500">
                         <div className="text-2xl mb-2">⏳</div>
                         <p className="text-xs">QR код үүсгэж байна...</p>
-                        <p className="text-xs text-red-500">Debug: qrCodeDataUrl is empty</p>
+
                       </div>
                     </div>
                   )}
@@ -577,57 +577,7 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
                   </div>
                 )}
                 
-                {/* Debug buttons for testing */}
-                <div className="mt-4 flex gap-2 justify-center">
-                  <Button
-                    onClick={() => {
-                      console.log('Manual QR generation triggered');
-                      generateQRCode();
-                    }}
-                    variant="outline"
-                    size="sm"
-                  >
-                    QR Код Дахин Үүсгэх (Debug)
-                  </Button>
-                  <Button
-                    onClick={async () => {
-                      if (paymentData?.invoiceId) {
-                        console.log('Manual payment status check triggered');
-                        try {
-                          const response = await fetch(`/api/qpay/callback?invoice_id=${paymentData.invoiceId}`);
-                          const result = await response.json();
-                          console.log('Manual payment check result:', result);
-                          alert(`Payment status: ${JSON.stringify(result, null, 2)}`);
-                        } catch (error) {
-                          console.error('Manual payment check failed:', error);
-                          alert('Payment check failed');
-                        }
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Төлбөр Шалгах (Debug)
-                  </Button>
-                  <Button
-                    onClick={async () => {
-                      console.log('Testing callback endpoint accessibility');
-                      try {
-                        const response = await fetch('/api/qpay/callback?test=ping');
-                        const result = await response.json();
-                        console.log('Callback test result:', result);
-                        alert(`Callback test: ${JSON.stringify(result, null, 2)}`);
-                      } catch (error) {
-                        console.error('Callback test failed:', error);
-                        alert('Callback test failed');
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Callback Test (Debug)
-                  </Button>
-                </div>
+
                 
 
               </div>

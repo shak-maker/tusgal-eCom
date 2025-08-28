@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { QPayClient } from '@/lib/qpay-client';
 import { getQPayConfig } from '@/lib/qpay-config';
 import { useCartStore } from '@/lib/cartStore';
-
-// Temporary storage for invoice data (in production, use Redis or database)
-export const invoiceDataStorage = new Map();
+import { invoiceDataStorage } from '@/lib/invoice-storage';
 
 export async function POST(request: NextRequest) {
   try {

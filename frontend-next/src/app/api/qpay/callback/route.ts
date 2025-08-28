@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { OrderStatus } from '@prisma/client';
 import { QPayClient } from '@/lib/qpay-client';
 import { getQPayConfig } from '@/lib/qpay-config';
-import { invoiceDataStorage } from '../create-invoice/route';
+import { invoiceDataStorage } from '@/lib/invoice-storage';
 
 // Mock order status storage in memory
 const mockOrderStatus = new Map<string, string>();

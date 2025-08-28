@@ -247,9 +247,18 @@ export async function POST(request: NextRequest) {
       const qpayResult = await verifyPaymentWithQPay(invoice_id || object_id, payment_id);
       
       // If payment is confirmed, create the order
+      console.log('🔍 Checking qpayResult structure:', {
+        hasResult: !!qpayResult,
+        isObject: typeof qpayResult === 'object',
+        resultType: typeof qpayResult
+      });
+      
       if (qpayResult && typeof qpayResult === 'object') {
         const payments = (qpayResult as any).rows || (qpayResult as any).data || [];
+        console.log('📊 Found payments array with length:', payments.length);
+        
         const confirmedPayment = payments.find((p: any) => p.payment_status === 'PAID');
+        console.log('🔍 Looking for PAID payment, found:', !!confirmedPayment);
         
         if (confirmedPayment) {
           console.log('✅ Payment confirmed, creating order...');
@@ -263,7 +272,11 @@ export async function POST(request: NextRequest) {
           } catch (orderError) {
             console.error('❌ Error creating order:', orderError);
           }
+        } else {
+          console.log('⚠️ No PAID payment found in payments array');
         }
+      } else {
+        console.log('⚠️ qpayResult is not an object or is null');
       }
     } catch (error) {
       console.error('❌ Failed to verify payment with QPay:', error);

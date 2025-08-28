@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { OrderStatus } from '@prisma/client';
 import { QPayClient } from '@/lib/qpay-client';
 import { getQPayConfig } from '@/lib/qpay-config';
+import { invoiceDataStorage } from '../create-invoice/route';
 
 // Mock order status storage in memory
 const mockOrderStatus = new Map<string, string>();
@@ -485,24 +486,73 @@ async function createOrderFromPayment(paymentData: any, invoiceId: string) {
   try {
     console.log('🛒 Creating order from payment data:', paymentData);
     
-    // For now, we'll create a basic order with minimal data
-    // In a real implementation, you'd want to get the cart items and customer data
-    // from the invoice or from a session/database
+    // Get stored invoice data
+    const storedInvoiceData = invoiceDataStorage.get(invoiceId);
+    
+    if (!storedInvoiceData) {
+      console.warn('⚠️ No stored invoice data found for:', invoiceId);
+      // Fallback to basic order creation
+      const orderData = {
+        items: [],
+        shippingAddress: 'Address not available',
+        phone: 'Phone not available',
+        email: 'email@example.com',
+        paymentId: paymentData.payment_id,
+        invoiceId: invoiceId,
+        status: 'PAID',
+        totalAmount: parseFloat(paymentData.payment_amount),
+        pdCm: null,
+        lensInfo: null
+      };
+      
+      console.log('📦 Using fallback order data:', orderData);
+      
+      const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/qpay/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Order created successfully (fallback):', result);
+        return result;
+      } else {
+        const error = await response.json();
+        console.error('❌ Failed to create order:', error);
+        throw new Error(`Failed to create order: ${error.error}`);
+      }
+    }
+    
+    // Use stored invoice data to create complete order
+    const { cartItems, customerData, totalAmount } = storedInvoiceData;
+    
+    console.log('📦 Retrieved stored invoice data:', {
+      cartItemsCount: cartItems.length,
+      customerEmail: customerData.email,
+      customerPhone: customerData.phone,
+      totalAmount
+    });
     
     const orderData = {
-      items: [], // This should be populated with actual cart items
-      shippingAddress: 'Address from payment', // This should come from customer data
-      phone: 'Phone from payment', // This should come from customer data
-      email: 'email@example.com', // This should come from customer data
+      items: cartItems.map((item: any) => ({
+        productId: item.product.id,
+        quantity: item.quantity
+      })),
+      shippingAddress: customerData.address || customerData.shippingAddress || 'Address not provided',
+      phone: customerData.phone,
+      email: customerData.email,
       paymentId: paymentData.payment_id,
       invoiceId: invoiceId,
       status: 'PAID',
       totalAmount: parseFloat(paymentData.payment_amount),
-      pdCm: null,
-      lensInfo: null
+      pdCm: customerData.pdCm || null,
+      lensInfo: customerData.lensInfo || null
     };
     
-    console.log('📦 Order data to create:', orderData);
+    console.log('📦 Complete order data to create:', orderData);
     
     // Call the create-order API
     const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/qpay/create-order`, {
@@ -515,7 +565,12 @@ async function createOrderFromPayment(paymentData: any, invoiceId: string) {
     
     if (response.ok) {
       const result = await response.json();
-      console.log('✅ Order created successfully:', result);
+      console.log('✅ Order created successfully with complete data:', result);
+      
+      // Clean up stored data after successful order creation
+      invoiceDataStorage.delete(invoiceId);
+      console.log('🧹 Cleaned up stored invoice data for:', invoiceId);
+      
       return result;
     } else {
       const error = await response.json();

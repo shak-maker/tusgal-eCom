@@ -3,6 +3,9 @@ import { QPayClient } from '@/lib/qpay-client';
 import { getQPayConfig } from '@/lib/qpay-config';
 import { useCartStore } from '@/lib/cartStore';
 
+// Temporary storage for invoice data (in production, use Redis or database)
+export const invoiceDataStorage = new Map();
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -39,13 +42,22 @@ export async function POST(request: NextRequest) {
 
     console.log('QPay invoice response:', JSON.stringify(invoice, null, 2));
 
-    console.log('QPay invoice response:', JSON.stringify(invoice, null, 2));
+    // Store cart items and customer data for later use when creating order
+    const invoiceData = {
+      cartItems,
+      customerData,
+      totalAmount,
+      createdAt: new Date().toISOString()
+    };
+    
+    invoiceDataStorage.set(invoice.invoice_id, invoiceData);
+    console.log('📦 Stored invoice data for:', invoice.invoice_id);
     
     return NextResponse.json({
       success: true,
       data: {
         invoiceId: invoice.invoice_id,
-        invoiceCode: invoice.invoice_code || invoice.sender_invoice_no, // Use invoice_code or fallback to sender_invoice_no
+        invoiceCode: invoice.invoice_code || invoice.sender_invoice_no,
         amount: invoice.amount,
         status: invoice.status,
         qrCodeUrl: `${qpayConfig.baseUrl}/v2/invoice/${invoice.invoice_id}/qr`,

@@ -102,6 +102,9 @@ export default function AdminOrdersPage() {
                     Дүн
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ашиг
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     PD (см)
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -129,6 +132,11 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ₮{order.totalAmount?.toLocaleString() || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className={`font-medium ${(order.totalProfit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ₮{(order.totalProfit || 0).toLocaleString()}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {typeof order.pdCm === 'number' ? order.pdCm : '—'}

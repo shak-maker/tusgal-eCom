@@ -33,6 +33,7 @@ model Product {
   name        String
   description String
   price       Float
+  costPrice   Float       @default(0)
   imageUrl    String
   stock       Int
   faceShape   String?

@@ -42,11 +42,35 @@ export async function GET(request: Request) {
       }),
       prisma.order.count({ where })
     ]);
+
+    // Calculate profit for each order
+    const ordersWithProfit = orders.map(order => {
+      let totalProfit = 0;
+      let totalRevenue = 0;
+      let totalCost = 0;
+
+      order.items.forEach(item => {
+        const revenue = item.price * item.quantity;
+        const cost = (item.product.costPrice || 0) * item.quantity;
+        const profit = revenue - cost;
+        
+        totalRevenue += revenue;
+        totalCost += cost;
+        totalProfit += profit;
+      });
+
+      return {
+        ...order,
+        totalProfit,
+        totalRevenue,
+        totalCost
+      };
+    });
     
     console.log(`Found ${orders.length} orders, total: ${total}`);
 
     return NextResponse.json({
-      orders,
+      orders: ordersWithProfit,
       pagination: {
         page,
         limit,

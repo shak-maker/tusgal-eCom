@@ -468,9 +468,11 @@ async function verifyPaymentWithQPay(invoiceId: string, paymentId: string) {
         date: confirmedPayment.payment_date
       });
     } else {
-      console.warn('⚠️ Payment not found or not confirmed in QPay API');
-      console.warn('⚠️ Looking for paymentId:', paymentId || 'ANY PAID PAYMENT');
-      console.warn('⚠️ Available payments:', payments.map(p => ({ id: p.payment_id, status: p.payment_status })));
+      if (payments.length === 0) {
+        console.log('⏳ No payments found yet - waiting for customer to complete payment');
+      } else {
+        console.log('📊 Found payments but none are PAID yet:', payments.map(p => ({ id: p.payment_id, status: p.payment_status })));
+      }
     }
 
     return response;

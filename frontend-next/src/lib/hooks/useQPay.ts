@@ -27,6 +27,8 @@ interface UseQPayReturn {
     name: string;
     email: string;
     phone: string;
+    pdCm?: number;
+    lensInfo?: any;
   }) => Promise<QPayPaymentData | null>;
   isLoading: boolean;
   error: string | null;
@@ -52,6 +54,8 @@ export const useQPay = (cartItems: Array<{
     name: string;
     email: string;
     phone: string;
+    pdCm?: number;
+    lensInfo?: any;
   }): Promise<QPayPaymentData | null> => {
     if (cartItems.length === 0) {
       setError('Cart is empty');

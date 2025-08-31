@@ -27,6 +27,8 @@ interface QPayPaymentProps {
     name: string;
     email: string;
     phone: string;
+    pdCm?: number;
+    lensInfo?: any;
   };
 }
 
@@ -41,6 +43,8 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
     name: propCustomerData?.name || '',
     email: propCustomerData?.email || '',
     phone: propCustomerData?.phone || '',
+    pdCm: propCustomerData?.pdCm,
+    lensInfo: propCustomerData?.lensInfo,
   });
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
@@ -264,6 +268,8 @@ export const QPayPayment: React.FC<QPayPaymentProps> = ({
         name: propCustomerData.name || '',
         email: propCustomerData.email || '',
         phone: propCustomerData.phone || '',
+        pdCm: propCustomerData.pdCm,
+        lensInfo: propCustomerData.lensInfo,
       });
     }
   }, [propCustomerData]);

@@ -718,7 +718,11 @@ export default function CheckoutPage() {
                   )}
                   <QPayPayment
                     cartItems={cartItems}
-                    customerData={formData}
+                    customerData={{
+                      ...formData,
+                      pdCm: typeof pdCm === 'number' ? pdCm : undefined,
+                      lensInfo: buyingEyeglasses ? lensInfo : undefined,
+                    }}
                     onPaymentSuccess={async (paymentData) => {
                       console.log('Payment completed successfully:', paymentData)
                       

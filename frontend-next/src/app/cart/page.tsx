@@ -1,100 +1,107 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { ShoppingBag, ArrowLeft } from 'lucide-react'
-import CartItem from '@/components/cartItem'
-import { useOrderExtrasStore } from '@/lib/orderExtrasStore'
-import { useUserPreferencesStore } from '@/lib/userPreferencesStore'
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ShoppingBag, ArrowLeft } from "lucide-react";
+import CartItem from "@/components/cartItem";
+import { useOrderExtrasStore } from "@/lib/orderExtrasStore";
+import { useUserPreferencesStore } from "@/lib/userPreferencesStore";
+import { LensMaterial, LensInfo } from "@/lib/types";
 
 type CartItem = {
-  id: string
+  id: string;
   product: {
-    id: string
-    name: string
-    imageUrl: string
-    price: number
-  }
-  quantity: number
-}
+    id: string;
+    name: string;
+    imageUrl: string;
+    price: number;
+  };
+  quantity: number;
+};
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [updating, setUpdating] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { buyingEyeglasses, setBuyingEyeglasses, lensInfo, setLensInfo } = useOrderExtrasStore()
-  const { pdCm } = useUserPreferencesStore()
+  const { buyingEyeglasses, setBuyingEyeglasses, lensInfo, setLensInfo } =
+    useOrderExtrasStore();
+  const { pdCm } = useUserPreferencesStore();
 
   useEffect(() => {
-    fetchCart()
-  }, [])
+    fetchCart();
+  }, []);
 
   async function fetchCart() {
     try {
-      setLoading(true)
-      setError(null)
-      const res = await fetch('/api/cart')
-      if (!res.ok) throw new Error('Failed to fetch cart')
-      const data = await res.json()
-      setCartItems(data)
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/cart");
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      const data = await res.json();
+      setCartItems(data);
     } catch (err) {
-      console.error('Failed to fetch cart items:', err)
-      setError('Failed to load cart items')
+      console.error("Failed to fetch cart items:", err);
+      setError("Failed to load cart items");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function updateQuantity(productId: string, newQuantity: number) {
-    if (newQuantity < 1) return
-    
+    if (newQuantity < 1) return;
+
     try {
-      setUpdating(productId)
+      setUpdating(productId);
       const res = await fetch(`/api/cart/${productId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: newQuantity })
-      })
-      
-      if (!res.ok) throw new Error('Failed to update quantity')
-      
-      setCartItems(prev => 
-        prev.map(item => 
-          item.product.id === productId 
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update quantity");
+
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.product.id === productId
             ? { ...item, quantity: newQuantity }
             : item
         )
-      )
+      );
     } catch (err) {
-      console.error('Failed to update quantity:', err)
-      setError('Failed to update quantity')
+      console.error("Failed to update quantity:", err);
+      setError("Failed to update quantity");
     } finally {
-      setUpdating(null)
+      setUpdating(null);
     }
   }
 
   async function removeItem(productId: string) {
     try {
-      setUpdating(productId)
+      setUpdating(productId);
       const res = await fetch(`/api/cart/${productId}`, {
-        method: 'DELETE'
-      })
-      
-      if (!res.ok) throw new Error('Failed to remove item')
-      
-      setCartItems(prev => prev.filter(item => item.product.id !== productId))
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to remove item");
+
+      setCartItems((prev) =>
+        prev.filter((item) => item.product.id !== productId)
+      );
     } catch (err) {
-      console.error('Failed to remove item:', err)
-      setError('Failed to remove item')
+      console.error("Failed to remove item:", err);
+      setError("Failed to remove item");
     } finally {
-      setUpdating(null)
+      setUpdating(null);
     }
   }
 
-  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   if (loading) {
     return (
@@ -118,7 +125,7 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -127,8 +134,8 @@ export default function CartPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft size={20} />
@@ -149,10 +156,14 @@ export default function CartPage() {
             <div className="flex justify-center mb-6">
               <ShoppingBag size={64} className="text-gray-300" />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Таны сагс хоосон байна</h2>
-            <p className="text-gray-600 mb-8">Та хараахан сагсанд бараа аваагүй байна</p>
-            <Link 
-              href="/" 
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Таны сагс хоосон байна
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Та хараахан сагсанд бараа аваагүй байна
+            </p>
+            <Link
+              href="/"
               className="inline-flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               Шилээ сонгох
@@ -168,7 +179,7 @@ export default function CartPage() {
                     Сагсан дахь шилнүүд ({itemCount})
                   </h2>
                 </div>
-                
+
                 <div className="divide-y divide-gray-200">
                   {cartItems.map((item) => (
                     <CartItem
@@ -190,55 +201,107 @@ export default function CartPage() {
                       checked={buyingEyeglasses}
                       onChange={(e) => setBuyingEyeglasses(e.target.checked)}
                     />
-                    <span className="text-gray-800 font-medium">Та харааны шил захиалж байна уу?</span>
+                    <span className="text-gray-800 font-medium">
+                      Та харааны шил захиалж байна уу?
+                    </span>
                   </label>
 
                   {buyingEyeglasses && (
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-gray-700 mb-1">PD (см)</label>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          PD (см)
+                        </label>
                         <input
                           type="number"
                           step="0.1"
                           placeholder="ж: 6.5"
-                          defaultValue={lensInfo?.pdCm ?? pdCm ?? ''}
+                          defaultValue={lensInfo?.pdCm ?? pdCm ?? ""}
                           onChange={(e) => {
-                            const v = parseFloat(e.target.value)
+                            const v = parseFloat(e.target.value);
                             setLensInfo({
                               ...(lensInfo ?? {}),
                               pdCm: Number.isNaN(v) ? undefined : v,
-                            })
+                            });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-700 mb-1">Баруун нүд хараа</label>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Баруун нүд хараа
+                        </label>
                         <input
                           type="text"
                           placeholder="ж: -1.25"
-                          value={lensInfo?.rightVision ?? ''}
-                          onChange={(e) => setLensInfo({ ...(lensInfo ?? {}), rightVision: e.target.value })}
+                          value={lensInfo?.rightVision ?? ""}
+                          onChange={(e) =>
+                            setLensInfo({
+                              ...(lensInfo ?? {}),
+                              rightVision: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-gray-700 mb-1">Зүүн нүд хараа</label>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Зүүн нүд хараа
+                        </label>
                         <input
                           type="text"
                           placeholder="ж: -1.00"
-                          value={lensInfo?.leftVision ?? ''}
-                          onChange={(e) => setLensInfo({ ...(lensInfo ?? {}), leftVision: e.target.value })}
+                          value={lensInfo?.leftVision ?? ""}
+                          onChange={(e) =>
+                            setLensInfo({
+                              ...(lensInfo ?? {}),
+                              leftVision: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                         />
                       </div>
 
+                      <div>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Шилний материал сонгох
+                        </label>
+                        <select
+                          value={lensInfo?.material ?? ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setLensInfo({
+                              ...(lensInfo ?? {}),
+                              material:
+                                value === ""
+                                  ? undefined
+                                  : (value as LensMaterial),
+                            });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                        >
+                          <option value="">Сонгох</option>
+                          <option value="normal_white">Энгийн цагаан</option>
+                          <option value="chameleon">Хамелеон</option>
+                          <option value="purple_chameleon">
+                            Үзмэн яагаан хамелеон
+                          </option>
+                        </select>
+                      </div>
+
                       <div className="md:col-span-2">
-                        <label className="block text-sm text-gray-700 mb-1">Тэмдэглэл</label>
+                        <label className="block text-sm text-gray-700 mb-1">
+                          Тэмдэглэл
+                        </label>
                         <textarea
-                          value={lensInfo?.notes ?? ''}
-                          onChange={(e) => setLensInfo({ ...(lensInfo ?? {}), notes: e.target.value })}
+                          value={lensInfo?.notes ?? ""}
+                          onChange={(e) =>
+                            setLensInfo({
+                              ...(lensInfo ?? {}),
+                              notes: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                           rows={3}
                         />
@@ -252,8 +315,10 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Захиалгийн хураангуй</h2>
-                
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Захиалгийн хураангуй
+                </h2>
+
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Дүн ({itemCount} Ширхэг)</span>
@@ -279,8 +344,8 @@ export default function CartPage() {
                 </Link>
 
                 <div className="mt-4 text-center">
-                  <Link 
-                    href="/" 
+                  <Link
+                    href="/"
                     className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     Дахин шил нэмэх
@@ -292,5 +357,5 @@ export default function CartPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

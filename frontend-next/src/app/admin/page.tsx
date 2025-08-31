@@ -63,17 +63,29 @@ interface OrderItem {
 interface Order {
   id: string;
   userId: string;
-  total: number;
+  totalAmount: number;
   status:
     | "ХҮЛЭЭГДЭЖ БАЙНА"
-    | "БАТАЛГААЖСАН"
+    | "БАТЛАГДСАН"
     | "ХҮРГЭЛТ ГАРСАН"
-    | "ХҮЛЭЭЖ АВСАН"
-    | "ЦУЦЛАГДСАН";
+    | "ХҮРГЭЛТ ДУУССАН"
+    | "ЦУЦЛАГДСАН"
+    | "ТӨЛӨГДСӨН"
+    | "АМЖИЛТГҮЙ";
   paid: boolean;
   shippingAddress?: string;
   phone?: string;
   email?: string;
+  latitude?: number;
+  longitude?: number;
+  pdCm?: number;
+  lensInfo?: {
+    pdCm?: number;
+    leftVision?: string;
+    rightVision?: string;
+    material?: string;
+    notes?: string;
+  };
   user?: {
     id: string;
     name?: string;
@@ -526,13 +538,17 @@ const GlassesAdminDashboard = () => {
     switch (status) {
       case "ХҮЛЭЭГДЭЖ БАЙНА":
         return "bg-yellow-100 text-yellow-800";
-      case "БАТАЛГААЖСАН":
+      case "БАТЛАГДСАН":
         return "bg-blue-100 text-blue-800";
       case "ХҮРГЭЛТ ГАРСАН":
         return "bg-green-100 text-green-800";
-      case "ХҮЛЭЭЖ АВСАН":
+      case "ХҮРГЭЛТ ДУУССАН":
         return "bg-purple-100 text-purple-800";
+      case "ТӨЛӨГДСӨН":
+        return "bg-emerald-100 text-emerald-800";
       case "ЦУЦЛАГДСАН":
+        return "bg-red-100 text-red-800";
+      case "АМЖИЛТГҮЙ":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -558,7 +574,7 @@ const GlassesAdminDashboard = () => {
     (order) => order.status === "ХҮЛЭЭГДЭЖ БАЙНА"
   ).length;
   const totalRevenue = orders.reduce(
-    (sum, order) => sum + (order.total || 0),
+    (sum, order) => sum + (order.totalAmount || 0),
     0
   );
 
@@ -724,7 +740,7 @@ const GlassesAdminDashboard = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-gray-900">
-                          ₮{order.total || 0}
+                          ₮{order.totalAmount || 0}
                         </p>
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
@@ -1174,30 +1190,37 @@ const GlassesAdminDashboard = () => {
             <h2 className="text-xl font-semibold text-gray-900">
               Orders Management
             </h2>
-
             {/* Order Details Modal */}
             {selectedOrder && (
-              <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+              <div
+                className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50"
+                onClick={() => setSelectedOrder(null)}
+              >
+                <div
+                  className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg relative overflow-y-auto max-h-[90vh]"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <h3 className="text-lg font-medium mb-4">
-                    Order Details - {selectedOrder.id}
+                    Захиалгийн мэдээлэл - {selectedOrder.id}
                   </h3>
+
                   <div className="space-y-4">
+                    {/* --- General Info --- */}
                     <div>
                       <p>
-                        <strong>Customer:</strong>{" "}
+                        <strong>Захиалагч:</strong>{" "}
                         {selectedOrder.user?.name || "N/A"}
                       </p>
                       <p>
-                        <strong>Email:</strong>{" "}
+                        <strong>И-Мейл:</strong>{" "}
                         {selectedOrder.user?.email || "N/A"}
                       </p>
                       <p>
-                        <strong>Date:</strong>{" "}
+                        <strong>Он Сар Өдөр:</strong>{" "}
                         {formatDate(selectedOrder.createdAt)}
                       </p>
                       <p>
-                        <strong>Status:</strong>
+                        <strong>Статус:</strong>
                         <span
                           className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
                             selectedOrder.status
@@ -1206,15 +1229,15 @@ const GlassesAdminDashboard = () => {
                           {selectedOrder.status}
                         </span>
                       </p>
+
                       {selectedOrder.shippingAddress && (
                         <p>
-                          <strong>Address:</strong>{" "}
-                          {selectedOrder.shippingAddress}
+                          <strong>Хаяг:</strong> {selectedOrder.shippingAddress}
                         </p>
                       )}
                       {selectedOrder.phone && (
                         <p>
-                          <strong>Phone:</strong> {selectedOrder.phone}
+                          <strong>Утас:</strong> {selectedOrder.phone}
                         </p>
                       )}
                       {"latitude" in selectedOrder &&
@@ -1232,6 +1255,8 @@ const GlassesAdminDashboard = () => {
                           </p>
                         )}
                     </div>
+
+                    {/* --- Items --- */}
                     <div>
                       <h4 className="font-medium mb-2">Items:</h4>
                       {selectedOrder.items.map((item, index) => (
@@ -1248,14 +1273,57 @@ const GlassesAdminDashboard = () => {
                       ))}
                       <div className="flex justify-between font-bold text-lg mt-2">
                         <span>Total:</span>
-                        <span>₮{selectedOrder.total || 0}</span>
+                        <span>₮{selectedOrder.totalAmount || 0}</span>
                       </div>
                     </div>
+
+                    {/* --- Eyeglasses / Lens Info --- */}
+                    {(selectedOrder.pdCm || selectedOrder.lensInfo) && (
+                      <div className="mt-4 border-t pt-4">
+                        <h4 className="font-medium mb-2">Шилний мэдээлэл:</h4>
+                        <div className="space-y-2 text-sm text-gray-700">
+                          {selectedOrder.pdCm && (
+                            <p>
+                              <strong>PD:</strong> {selectedOrder.pdCm} см
+                            </p>
+                          )}
+                          {selectedOrder.lensInfo?.rightVision && (
+                            <p>
+                              <strong>Баруун нүд:</strong>{" "}
+                              {selectedOrder.lensInfo.rightVision}
+                            </p>
+                          )}
+                          {selectedOrder.lensInfo?.leftVision && (
+                            <p>
+                              <strong>Зүүн нүд:</strong>{" "}
+                              {selectedOrder.lensInfo.leftVision}
+                            </p>
+                          )}
+                          {selectedOrder.lensInfo?.material && (
+                            <p>
+                              <strong>Материал:</strong>{" "}
+                              {selectedOrder.lensInfo.material === 'normal_white' ? 'Энгийн цагаан' :
+                               selectedOrder.lensInfo.material === 'chameleon' ? 'Хамелеон' :
+                               selectedOrder.lensInfo.material === 'purple_chameleon' ? 'Үзмэн яагаан хамелеон' :
+                               selectedOrder.lensInfo.material}
+                            </p>
+                          )}
+                          {selectedOrder.lensInfo?.notes && (
+                            <p>
+                              <strong>Тэмдэглэл:</strong>{" "}
+                              {selectedOrder.lensInfo.notes}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Close Button */}
                   <div className="flex justify-end space-x-2 mt-6">
                     <button
                       onClick={() => setSelectedOrder(null)}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                      className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
                     >
                       Close
                     </button>
@@ -1263,7 +1331,6 @@ const GlassesAdminDashboard = () => {
                 </div>
               </div>
             )}
-
             {/* Orders Table */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
@@ -1306,7 +1373,7 @@ const GlassesAdminDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₮{order.total || 0}
+                        ₮{order.totalAmount || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
@@ -1321,10 +1388,12 @@ const GlassesAdminDashboard = () => {
                           <option value="ХҮЛЭЭГДЭЖ БАЙНА">
                             Хүлээгдэж байна
                           </option>
-                          <option value="БАТАЛГААЖСАН">Баталгаажсан</option>
+                          <option value="БАТЛАГДСАН">Баталгаажсан</option>
                           <option value="ХҮРГЭЛТ ГАРСАН">Хүргэлт гарсан</option>
-                          <option value="ХҮЛЭЭЖ АВСАН">Хүлээж авсан</option>
+                          <option value="ХҮРГЭЛТ ДУУССАН">Хүргэлт дууссан</option>
+                          <option value="ТӨЛӨГДСӨН">Төлөгдсөн</option>
                           <option value="ЦУЦЛАГДСАН">Цуцлагдсан</option>
+                          <option value="АМЖИЛТГҮЙ">Амжилтгүй</option>
                         </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

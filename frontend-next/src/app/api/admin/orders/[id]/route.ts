@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { ApiContext } from '@/lib/types';
+import { getEnglishStatus, getMongolianStatus } from '@/lib/orderStatusMap';
 
 // GET /api/admin/orders/[id] - get single order
 export async function GET(
@@ -29,7 +30,13 @@ export async function GET(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    return NextResponse.json(order);
+    // Convert status to Mongolian text
+    const orderWithMongolianStatus = {
+      ...order,
+      status: getMongolianStatus(order.status)
+    };
+
+    return NextResponse.json(orderWithMongolianStatus);
   } catch (error) {
     console.error('Error fetching order:', error);
     return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 });
@@ -64,8 +71,15 @@ export async function PUT(
     const updateData: any = {};
     
     if (status) {
-      updateData.status = status;
-      console.log('🔄 Updating status from', existingOrder.status, 'to', status);
+      // Convert Mongolian status text to English enum value
+      const englishStatus = getEnglishStatus(status);
+      if (englishStatus) {
+        updateData.status = englishStatus;
+        console.log('🔄 Updating status from', existingOrder.status, 'to', englishStatus);
+      } else {
+        console.log('❌ Invalid status:', status);
+        return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+      }
     }
     if (typeof paid === 'boolean') updateData.paid = paid;
     if (shippingAddress) updateData.shippingAddress = shippingAddress;
@@ -92,7 +106,14 @@ export async function PUT(
     });
 
     console.log('✅ Order updated successfully:', { id, newStatus: updatedOrder.status });
-    return NextResponse.json(updatedOrder);
+    
+    // Convert status to Mongolian text for response
+    const updatedOrderWithMongolianStatus = {
+      ...updatedOrder,
+      status: getMongolianStatus(updatedOrder.status)
+    };
+    
+    return NextResponse.json(updatedOrderWithMongolianStatus);
   } catch (error) {
     console.error('💥 Error updating order:', error);
     return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });

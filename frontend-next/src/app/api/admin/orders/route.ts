@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getMongolianStatus } from "@/lib/orderStatusMap";
 
 // GET - Get all orders for admin
 export async function GET(request: Request) {
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
       prisma.order.count({ where })
     ]);
 
-    // Calculate profit for each order
+    // Calculate profit for each order and convert status to Mongolian
     const ordersWithProfit = orders.map(order => {
       let totalProfit = 0;
       let totalRevenue = 0;
@@ -59,8 +60,11 @@ export async function GET(request: Request) {
         totalProfit += profit;
       });
 
+
+
       return {
         ...order,
+        status: getMongolianStatus(order.status),
         totalProfit,
         totalRevenue,
         totalCost

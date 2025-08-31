@@ -1,4 +1,13 @@
-// API Route Context Types
+export type LensMaterial = "normal_white" | "chameleon" | "purple_chameleon";
+
+export type LensInfo = {
+  pdCm?: number;
+  leftVision?: string;
+  rightVision?: string;
+  material?: LensMaterial;
+  notes?: string;
+};
+
 export interface ApiContext {
   params: Promise<{
     id: string;

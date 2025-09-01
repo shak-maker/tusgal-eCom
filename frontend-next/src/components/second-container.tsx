@@ -79,7 +79,7 @@ function ContainerTwo() {
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full sm:w-auto flex-1 h-12 text-black border-2 p-3 rounded-2xl text-gray-700 bg-white border-[rgba(94,172,221,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium px-4"
+              className="w-full sm:w-auto flex-1 h-12 border-2 p-3 rounded-2xl text-gray-700 bg-white border-[rgba(94,172,221,1)] hover:bg-blue-50 hover:text-[rgba(94,172,221,1)] text-base font-medium px-4"
             >
               <option value="" disabled>
                 {loadingCategories ? "Ангиллуудыг уншиж байна..." : "Ангилал сонгох"}

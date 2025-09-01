@@ -25,19 +25,28 @@ export default function TryOnModal({ isOpen, onClose, product }: TryOnModalProps
 
   // Start camera stream
   const startCamera = async () => {
-    setIsCapturing(true)
+  setIsCapturing(true)
+  try {
+    let stream: MediaStream | null = null
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } // Front camera
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' }
       })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-      }
-    } catch (err) {
-      console.error('Camera error:', err)
-      setIsCapturing(false)
+    } catch {
+      // Fallback for iOS/Android browsers that don't support facingMode
+      stream = await navigator.mediaDevices.getUserMedia({ video: true })
     }
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream
+      // Required for some mobile browsers
+      await videoRef.current.play()
+    }
+  } catch (err) {
+    console.error('Camera error:', err)
+    setIsCapturing(false)
+    alert('Камер нээхэд алдаа гарлаа. Та төхөөрөмжийн зөвшөөрлийг шалгана уу.')
   }
+}
 
   // Capture image from camera
   const captureImage = () => {
@@ -49,7 +58,7 @@ export default function TryOnModal({ isOpen, onClose, product }: TryOnModalProps
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0)
         setCapturedImage(canvas.toDataURL('image/png'))
-        stopCamera()
+        stopCamera();
       }
     }
   }
